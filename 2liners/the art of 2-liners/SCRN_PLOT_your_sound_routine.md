@@ -9,8 +9,8 @@ https://archive.org/details/AssemblyLinesCompleteWagner/mode/2up
 
 ### How it usually works
 We all know that the speaker of the Apple II is rather limited. What's worse is that there's no way in Applesoft to generate other sounds than
-- a beep, using PRINT CHR$(7)
-- a click, by accessing address 49200, for example using a PEEK or a POKE
+- a beep, using ``PRINT CHR$(7)``
+- a click, by accessing address 49200, for example using a ``PEEK`` or a ``POKE``
 
 The latest technique is called 1-bit sound. It sends a voltage signal to the Apple speaker that will just produce a click because it has been "activated". It is 1-bit because it's either on or off: we're sending voltage or not.
 
@@ -32,19 +32,21 @@ The routine is the following:
 ```
 
 Usage from Applesoft is then the following:
-POKE 6, P: POKE 7, D: CALL S
+```POKE 6, P: POKE 7, D: CALL S```
 
 Where P is the "pitch" and D is the duration ...
 
 ## Integration with Applesoft: the regular way
 But if we want this routine available for Applesoft, we have to either load it from disk (which is not allowed in a 2-liner) or to POKE it into memory before usage.
 Like this:
+```
 10 S=768: FOR L = 0 TO 13 : READ V : POKE S+L ,V : NEXT L: REM 38 + 1 character (":")
 20 DATA 166, 7, 164, 6, 173, 48, 192, 136, 208, 253, 202, 208, 245, 96:  REM +53 chars = 92 chars
+```
 
 As you can see, this takes 92 characters if we were to use it in a 2-liner ... 
 And each call to generate a sound would take 21 additional characters assuming we use variables for pitch and duration:
-POKE 6,P : POKE 7,D : CALL S
+``POKE 6,P : POKE 7,D : CALL S``
 
 ## Integration with Applesoft: relocation of routine in page zero
 Can this be reduced ?
