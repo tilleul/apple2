@@ -32,9 +32,11 @@ The routine is the following:
 ```
 
 Usage from Applesoft is then the following:
-```POKE 6, P: POKE 7, D: CALL S```
+```
+POKE 6, P: POKE 7, D: CALL S
+```
 
-Where P is the "pitch" and D is the duration ...
+Where P is the "pitch", D is the duration and S equals 768...
 
 ## Integration with Applesoft: the regular way
 But if we want this routine available for Applesoft, we have to either load it from disk (which is not allowed in a 2-liner) or to POKE it into memory before usage.
@@ -46,30 +48,36 @@ Like this:
 
 As you can see, this takes 92 characters if we were to use it in a 2-liner ... 
 And each call to generate a sound would take 21 additional characters assuming we use variables for pitch and duration:
-``POKE 6,P : POKE 7,D : CALL S``
+```
+POKE 6,P : POKE 7,D : CALL S
+```
 
 ## Integration with Applesoft: relocation of routine in page zero
 Can this be reduced ?
 Well, first we could relocate it in page zero ... after all, it's only 14 bytes ... of course this all depends on what you need in page zero.
 For example, bytes $34-$4F are used by Monitor, it is doubtful you have a need for it (but who knows) ... this would result in, 
 for example (not all memory location work):
+```
 10 FOR L = 60 TO 73 : READ V : POKE L,V : NEXT L:  REM 31+1 chars
 20 DATA 166, 7, 164, 6, 173, 48, 192, 136, 208, 253, 202, 208, 245, 96:  REM +53 chars = 85 chars
+```
 Each call to generate a sound would take 22 additional characters (because we didn't store the calling address in S)
 
 But this is still a lot of bytes just to emit an interesting (?) sound ...
+## The main problem: 1-byte value expressed in 3 bytes
 The main problem is the data we have to poke ... it ranges from 0 to 255 ...
 It means, in basic, values above 99 will take triple the space needed !
 The DATA line, if we omit "DATA" is 49 characters long for only 14 bytes !
+
 Hexadecimal representation of bytes take only two characters, so it would be only 28 characters in the end. This is the way to explore/experiment.
 
 There are ways to send monitor commands via Applesoft but even the monitor does not accept less than 3 characters per byte, that is two characters for the byte + one space like "300:16 07 14 06 AD 30 C0 88 D0 FD CA D0 F5 60".
 Such a program would be like this (see http://nparker.llx.com/a2/shlam.html for more info)
-
+```
 100 A$="300:A6 07 A4 06 AD 30 C0 88 D0 FD CA D0 F5 60 N D823G": REM  58+1 chars
 110 FOR X=1 TO LEN(A$): POKE 511+X,ASC(MID$(A$,X,1))+128: NEXT: REM +52+1 chars = 112 chars
 120 POKE 72,0: CALL -144 : REM + 17 chars = 129 chars
-
+```
 As you can see, this is worse !
 
 The simple fact that we need 3 characters to "express" one byte is intolerable ...
