@@ -91,7 +91,7 @@ A6 07 A4 06 AD 30 C0 88 D0 FD CA D0 F5 60
 This is only 28 characters if we omit spaces but 41 if we count spaces.
 
 ## PRINT code ?
-Could we use ``PRINT`` to print the code in TEXT page 1 ?
+Since ASCII is the shortest as it takes only 14 bytes, could we use ``PRINT`` to print the code in TEXT page 1 ?
 If this code was in $400 (TEXT page 1), it would display like this:
 
 ![screen capture](img/printsoundroutine.gif)
@@ -109,12 +109,25 @@ This is still 82 characters, not counting the ``HOME`` instruction. This instruc
 If we have a 80-column card we can also use the following code:
 ```
 HOME
-PR#3
-?"<CTRL-Q>&<CTRL-O>G<CTRL-N>$<CTRL-O>F<CTRL-N>-<CTRL-O>0<CTRL-N>@HP}JPu<CTRL-O>`<CTRL-N>"
+?"<CTRL-D>PR#3"       : REM 8+1 chars
+?"<CTRL-Q>&<CTRL-O>G<CTRL-N>$<CTRL-O>F<CTRL-N>-<CTRL-O>0<CTRL-N>@HP}JPu<CTRL-O>`<CTRL-N>"     : REM +26 chars = 35 chars
 ```
 
+Explanation:
+* ``?"<CTRL-D>PR#3"`` activates the 80-column card. A carriage return is needed for this command, that's why it's separated from the rest of the code. Once this has been executed, we are in 80 columns mode, it means every other character is actually in auxialary memory, so we need to deactivate 80-columns mode ASAP but not the 80-column hardware.
+* ``<CTRL-Q>`` CTRL-Q goes back to 40 columns mode with the 80-column hardware still active.
+* ``<CTRL-O>`` every CTRL-O activates INVERSE mode
+* ``<CTRL-N>`` while CTRL-N brings back NORMAL mode. Don't forget to end your string with a CTRL-N or you'll be in INVERSE mode after running the code
+* ``<CTRL-O>`<CTRL-N>`` there is no FLASH when using the 80-columns hardware, but instead we have an extended INVERSE mode. That's why we print the equivalent of that normally flashing space.
 
-## He
+The result is the following
+
+![screen capture](img/printsoundroutine80.gif)
+
+As you can see the routine has been perfectly PRINTed into memory. This technique is perfect if you have a 80-column card.
+However, one must admit that typing all these CTRLs every time you modify your code is arduous. And of course, it means never scrolling the TEXT page or the routine would disappear. And also, TEXT display is noticeably slower than when the 80-column card is activated. You could deactivate it by adding ``CHR$(21)`` at the end of the ``PRINT`` statement but it costs you 8 more characters. Still 43 characters is still outstanding.
+
+## POKEing Hexadecimal from Applesoft
 
 Hexadecimal representation of bytes take only two characters, so it would be only 28 characters in the end. This is the way to explore/experiment.
 
