@@ -111,6 +111,7 @@ If we have a 80-column card we can also use the following code:
 10 HOME
 20 ?"<CTRL-D>PR#3"       : REM 8+1 chars
 30 ?"<CTRL-Q>&<CTRL-O>G<CTRL-N>$<CTRL-O>F<CTRL-N>-<CTRL-O>0<CTRL-N>@HP}JPu<CTRL-O>`<CTRL-N>"     : REM +26 chars = 35 chars
+40 POKE 1031,136           : REM +12 chars = 47 chars
 ```
 
 Explanation:
@@ -119,6 +120,7 @@ Explanation:
 * ``<CTRL-O>`` every CTRL-O activates INVERSE mode
 * ``<CTRL-N>`` while CTRL-N brings back NORMAL mode. Don't forget to end your string with a CTRL-N or you'll be in INVERSE mode after running the code
 * ``<CTRL-O>`<CTRL-N>`` there is no FLASH when using the 80-columns hardware, but instead we have an extended INVERSE mode. That's why we print the equivalent of that normally flashing space.
+* ``POKE 1031,136`` so far we saved a lot of characters, unfortunately some characters cannot be ``PRINT``ed. That's the case of every value between 128 and 159 as well as the value 255. That's why we need to directly POKE these values in the appropriate memory spot.
 
 (all these CTRL codes are explained in the 80-column cards manuals, for example [here on Asimov]( https://www.apple.asimov.net/documentation/hardware/video/Apple%20IIe%20Extended%2080-Column%20Text%20Card%20%28Rev%20B%29.pdf) )
 
@@ -126,10 +128,20 @@ The result is the following
 
 ![screen capture](img/printsoundroutine80.gif)
 
-As you can see the routine has been perfectly PRINTed into memory. This technique is perfect if you have a 80-column card.
-However, one must admit that typing all these CTRLs every time you modify your code is arduous. And of course, it means never scrolling the TEXT page or the routine would disappear. And also, TEXT display is noticeably slower than when the 80-column card is activated. You could deactivate it by adding ``CHR$(21)`` at the end of the ``PRINT`` statement but it costs you 8 more characters. 
+As you can see the routine has been perfectly PRINTed into memory (+ that one POKE). 
 
-Well ... 43 characters is still outstanding.
+This technique is great if you have a 80-column card.
+
+However, one must admit that typing all these CTRLs every time you modify your code is arduous. 
+
+Of course as with every other ``PRINT`` instead of ``POKE`` technique, it means never scrolling the TEXT page or the routine would disappear. 
+
+Also, TEXT display is noticeably slower when the 80-column card is activated. You could deactivate it by adding ``CHR$(21)`` at the end of the ``PRINT`` statement but it costs you 8 more characters. 
+
+Well ... 47+8 = 55 characters. This is still outstanding.
+
+Apart from needing a 80-column card, the main drawback to this technique is that for some routines, you'll need help of a POKE or two because characters from $80->$9F (128 to 159) and $FF (255) cannot be ``PRINT``ed. But as this will only take 11-12 chars more it might be acceptable in most of the cases.
+
 Could we do better ?
 
 ## POKEing Hexadecimal from Applesoft
@@ -192,6 +204,8 @@ Explanation:
 The Applesoft code begins in $800 (2048). The first letter of A$ is in position $809 (2057). We simply read those values directly from the code location.
 
 All in all, it's still 105 characters long !
+
+There are variations to this technique: instead of having an assignment to a variable we could have a ``DATA``or a ``REM`` and access its precise memory location in the code. ``DATA`` is in fact shorter of 1 character (because you don't need quotes. ``REM``has the inconvenient of having to be used as the last statement of the line
 
 Can we do better ? Of course.
 
