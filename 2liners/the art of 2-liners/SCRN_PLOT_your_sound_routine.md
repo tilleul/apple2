@@ -1,5 +1,5 @@
-# SCRN/PLOT your sound routine (or any other)
-This aricle will explain a new (?) technique to poke subroutines using Applesoft (without using POKEs at ALL :D ) and actually spare several characters if you're into 2-liners.
+# SCRN/PLOT your 6502/ASM sound routine (or any other)
+This aricle will explain a new (?) technique to poke ASM (machine language) subroutines using Applesoft (without using POKEs at ALL) and actually spare several characters if you're into 2-liners.
 
 ## Generating various sounds in 2-liners.
 Using a sound generating routine, we are going to see different techniques to interface assembly routines with Applesoft in the context of 2-liners.
@@ -115,7 +115,7 @@ If we have a 80-column card we can also use the following code:
 ```
 
 Explanation:
-* ``?"<CTRL-D>PR#3"`` activates the 80-column card. A carriage return is needed for this command, that's why it's separated from the rest of the code. Once this has been executed, we are in 80 columns mode, it means every other character is actually in auxialary memory, so we need to deactivate 80-columns mode ASAP but not the 80-column hardware.
+* ``?"<CTRL-D>PR#3"`` activates the 80-column card. A carriage return is needed for this command, that's why it's separated from the rest of the code. Once this has been executed, we are in 80 columns mode, it means every other character is actually in auxiliary memory, so we need to deactivate 80-columns mode ASAP but not the 80-column hardware.
 * ``<CTRL-Q>`` CTRL-Q goes back to 40 columns mode with the 80-column hardware still active.
 * ``<CTRL-O>`` every CTRL-O activates INVERSE mode
 * ``<CTRL-N>`` while CTRL-N brings back NORMAL mode. Don't forget to end your string with a CTRL-N or you'll be in INVERSE mode after running the code
@@ -140,9 +140,11 @@ Also, TEXT display is noticeably slower when the 80-column card is activated. Yo
 
 Well ... 47+8 = 55 characters. This is still outstanding.
 
-Apart from needing a 80-column card, the main drawback to this technique is that for some routines, you'll need help of a POKE or two because characters from $80->$9F (128 to 159) and $FF (255) cannot be ``PRINT``ed. But as this will only take 11-12 chars more it might be acceptable in most of the cases.
+Apart from needing a 80-column card, the main drawback to this technique is that for some routines, you'll need the help of a POKE or two because characters from $80->$9F (128 to 159) and $FF (255) cannot be ``PRINT``ed. But as this will only take 11-12 chars more it might be acceptable in most of the cases.
 
-Could we do better ?
+If you have 2 un``PRINT``able characters it will take 24 additional characters to POKE. This brings us to a total of 79 bytes ! An additional un``PRINT``able character and we are above 100 characters !
+
+There must be a better more general way !
 
 ## POKEing Hexadecimal from Applesoft
 Hexadecimal representation of bytes take only two characters, so it would be only 28 characters in the end. Of course Applesoft doesn't handle hexadecimal but maybe there are workarounds ?
