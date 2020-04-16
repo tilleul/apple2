@@ -179,7 +179,7 @@ As you can see there are two lines 30. The second one is an optimization of the 
 If we combine line 40 and line 30 (``POKE 768+I/2, ASC( ...``) we have 112 characters !
 
 Can we do better ?
-## Using a string but without manipulating the string
+### Using a string but without manipulating the string
 Starting with our coded ``A$`` string, instead of using ``MID$`` and ``ASC`` to get the value to ``POKE``, we could "read" the value directly from it's location in the code.
 
 ```
@@ -193,28 +193,58 @@ The Applesoft code begins in $800 (2048). The first letter of A$ is in position 
 
 All in all, it's still 105 characters long !
 
-Can we do better ?
+Can we do better ? Of course.
 
-##
+## New technique: PRINT/PLOT hexadecimal
 So here comes the technique I've developed for this particular case.
+
 Notice that it can be used for all kinds of subroutines .... just be aware that we're "printing" routines and that the TEXT page lines are not sequential (line 1 is not in $400+40 chars)
 
 This new (?) technique involves using four very simple instructions: PRINT, SCRN, COLOR and PLOT.
+
 We will be using the GR/TEXT capabilities of Applesoft to poke a program in TEXT page 1.
+
 How does it work ?
+### PRINT
 First we start from our 14 routine bytes: A6 07 A4 06 AD 30 C0 88 D0 FD CA D0 F5 60
+
 We leave every number as it is, but we replace all the letters with new letters according to this:
+
 A becomes J, B becomes K, C->L, D->M, E->N and F becomes O.
+
 We now have J6 07 J4 06 JM 30 L0 88 M0 OM LJ M0 O5 60
 
 We will now take advantage of the GR/TEXT screen and the SCRN function.
-We are going to print every low-nibble (4 bits) of each char on line 1 of TEXT (which is line 0 of GR), this means we print "6746M0080MJ050"
-we will print every high-nibble of each char on line 2 of TEXT (which is line 2 of GR), this means we print "J0J0J3L8MOLMO6"
 
-Then, we will move/copy line 2 of GR, using SCRN to get its "value" (color), to line 1 of GR.
-The result is that in line 0 of GR, we'll have our sound routine.
+We are going to print every low-nibble (4 bits) of each char on line 1 of TEXT (which is line 0 of GR), this means we print "6746M0080MJ050"
+
+And we will print every high-nibble of each char on line 2 of TEXT (which is line 2 of GR), this means we print "J0J0J3L8MOLMO6"
+
+The result is the following:
+
+![screen capture](img/printplotsound1.gif)
+
+If you watch closely, you'll notice that the low nibble is already in place in $400 for our first byte (we have the "6" of $A6) and that the low nibble of the value in $480 ("A" from $CA) is the value we need to place as the high nibble of our first byte.
+
+We must find a way to leave unchanged the low nibble of each byte in line 1 and use the low nibble of each byte in line 2 as the high nibble of each byte in line 1.
+
+### SCRN, COLOR & PLOT
+As you know, SCRN will return the color of a "point" in Lo-res. You also know that one TEXT character is represented as 2 "vertical" points of various colors in lores.
+
+Here's what our two PRINTs look like in GR:
+
+![screen capture](img/printplotsound2.gif)
+
+You see 4 lines of colored points because we printed 2 lines of text.
+
+The colors in line 0 correspond to the low-nibble (4 bits) of the bytes in $400->$40D while the colors in line 1 corresponds to the high-nibble of the bytes in the same range.
+
+And of course, the same goes for lines 2 & 3... Now all we have to do is copy the points in GR line 2 (low-nibbles of bytes in $480-$48D) to line 1 (high nibbles of bytes in $400-$40D).
+
+The result is that in line 0 and 1 of GR, we'll have our sound routine.
 
 Here's the resulting code:
+```
 0 HOME: REM 4 chars (not counted)
 1 ?"6746M0080MJ050": REM  17+1 chars
 2 ?"J0J0J3L8MOLMO6": REM +17+1 chars = 36 chars
@@ -222,13 +252,12 @@ Here's the resulting code:
 4 COLOR = SCRN(I,2): REM +15+1 chars = 63 chars     we have a value 0-15
 5 PLOT I,1: REM +7+1 chars = 71 chars     we PLOT it on line 1, actually adding 16*color to the byte in $400+I
 6 NEXT : REM +4 chars = 75 chars
-
+```
 Even with the "HOME" statement at first (which is needed but might already be included in your 2-liner), we have 75+4+1 chars = 80 chars
 
 This is still better than the traditional POKE technique ...
 
-This method can be used to POKE/PLOT longer routines ... just make sure to take into account the fact that one line is 40 chars max, so you
-if you need to handle more bytes, simply add a embracing loop to repeat as needed ... don't forget you can do "NEXT I,J" instead of "NEXT:NEXT" !
+This method can be used to POKE/PLOT longer routines ... just make sure to take into account the fact that one line is 40 chars max, so if you need to handle more bytes, simply add a embracing loop to repeat as needed ... don't forget you can do "NEXT I,J" instead of "NEXT:NEXT" !
 
 Of course, if you need line 1 of TEXT or line 0 of GR, you'll see the routine ... it's probably better using Hires 2-liners....
 
@@ -236,9 +265,13 @@ One last thing.
 
 Roger Wagner's assembly lines contains another routine to handle sound that might be very useful for 2-liners.
 Instead of using 
+```
 POKE 6,P: POKE 7,D: CALL 1024
+```
 it's using
+```
 CALL 1024, P, D
+```
 
 This means saving 12 characters every time you want to emit a sound.
 However, the routine itself (see page 148 of the book) is not 14 bytes but 24 bytes. That's 10 bytes more.
@@ -247,6 +280,7 @@ But if you need more tunes, use the 24 bytes routine !
 
 The 24 bytes routine uses 95 characters by itself ... it's almost as good as the "usual" routine we presented first that had 92 chars but it will take 9 characters less to call it !
 
+```
 10 HOME : REM 4 (not counted)
 20 ? "0L7660L7676746M0080MJ050"   : REM  27+1
 30 ? "24N8024N80J0J0J3L8MOLMO6"   : REM +27+1 = 56
@@ -259,7 +293,7 @@ The 24 bytes routine uses 95 characters by itself ... it's almost as good as the
 120 FOR I = 0 TO 255
 130 CALL 1024 , I, 10
 140 NEXT
-
+```
 
 I hope you enjoyed this little tutorial on "how I did it" ! .... 
 
