@@ -1,5 +1,12 @@
 # SCRN/PLOT your 6502/ASM sound routine (or any other)
-This aricle will explain a new (?) technique to poke ASM (machine language) subroutines using Applesoft (without using POKEs at ALL) and actually spare several characters if you're into 2-liners.
+This article will explain a new (?) technique to poke ASM (machine language) subroutines using Applesoft (without using POKEs at ALL) and actually spare several characters if you're into 2-liners.
+
+## 6502 Subroutines in 2-liners
+Because 2-liners have to be short (maximum 239 characters per line of code), 6502 subroutines are usually short too. These routines might solve in a few bytes complex problems like generating a tune, scrolling a graphics screen or do a repetitive task best handled by machine code.
+
+Most of the time these routines are called using the ``CALL`` statement and if it takes parameters those are ``POKE``d beforehand.
+
+Because every character count, sometimes it's best to create "&" routines 
 
 ## Generating various sounds in 2-liners.
 Using a sound generating routine, we are going to see different techniques to interface assembly routines with Applesoft in the context of 2-liners.
