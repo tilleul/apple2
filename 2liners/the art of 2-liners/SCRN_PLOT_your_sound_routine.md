@@ -36,7 +36,7 @@ Usage from Applesoft is then the following:
 POKE 6, P: POKE 7, D: CALL S
 ```
 
-Where P is the "pitch", D is the duration and S equals 768...
+Where P is the "pitch", D is the duration and S equals 768 ($300)...
 
 ## Integration with Applesoft: the regular way
 But if we want this routine available for Applesoft, we have to either load it from disk (which is not allowed in a 2-liner) or to POKE it into memory before usage.
@@ -61,13 +61,60 @@ for example (not all memory location work):
 10 FOR L = 60 TO 73 : READ V : POKE L,V : NEXT L:  REM 31+1 chars
 20 DATA 166, 7, 164, 6, 173, 48, 192, 136, 208, 253, 202, 208, 245, 96:  REM +53 chars = 85 chars
 ```
-Each call to generate a sound would take 22 additional characters (because we didn't store the calling address in S)
+It's reduced to 85 chars ! But each call to generate a sound would take 22 additional characters (because we didn't store the calling address in S)
+```
+POKE 6,P : POKE 7,D : CALL 60
+```
 
 But this is still a lot of bytes just to emit an interesting (?) sound ...
 ## The main problem: 1-byte value expressed in 3 bytes
-The main problem is the data we have to poke ... it ranges from 0 to 255 ...
-It means, in basic, values above 99 will take triple the space needed !
-The DATA line, if we omit "DATA" is 49 characters long for only 14 bytes !
+
+The data we have to poke, ranges from 0 to 255 ...
+It means that in Applesoft, values above 9, will take 2 bytes (2 characters), while values above 99 will take 3 bytes !
+It feels like a waste when you know that a value of 100 could be represented as
+* a character (``d``) in ASCII, taking one byte to represent
+* an hexadecimal value of ``64``, taking only 2 bytes to represent
+
+Also using DATA and colons to separate each value adds another character, so a value of 100 is actually taking 4 bytes !
+
+The DATA line itself in our example, if we omit "DATA", is 49 characters long for only 14 bytes worth !
+Is it possible to reduce this ?
+
+Here are the values again (49 characters, omitting spaces):
+```
+166, 7, 164, 6, 173, 48, 192, 136, 208, 253, 202, 208, 245, 96
+```
+In hexa this becomes:
+```
+A6 07 A4 06 AD 30 C0 88 D0 FD CA D0 F5 60
+```
+This is only 28 characters if we omit spaces but 41 if we count spaces.
+
+## PRINT code ?
+Could we use ``PRINT`` to print the code in TEXT page 1 ?
+If this code was in $400 (TEXT page 1), it would display like this:
+
+![screen capture](img/printsoundroutine.gif)
+
+There are 3 INVERSE characters (byte value < 64), one FLASH character (byte value between 64 and 127), 9 NORMAL characters (byte value between 160 and 255) and 1 non-``PRINT``able character (value between 128 and 159).
+To reproduce this we would have to do the following:
+```
+HOME:                 REM   4 chars (not counted)
+NORMAL:               REM   6+1 chars
+?"&G$F-0@HP}JPu":     REM +16+1 chars = 24 chars
+POKE 1025,7: POKE1027,6: POKE1029,48: POKE1031,136: POKE1037,96     : REM +58 chars = 82 chars
+```
+This is still 82 characters, not counting the ``HOME`` instruction. This instruction is needed for the code to work but usually there nonetheless in most 2-liners.
+
+If we have a 80-column card we can also use the following code:
+```
+HOME
+PR#3
+?"<CTRL-Q>&<CTRL-O>G<CTRL-N>$<CTRL-O>F<CTRL-N>-<CTRL-O>0<CTRL-N>@HP}JPu<CTRL-O>`<CTRL-N>"
+```
+
+
+## He
 
 Hexadecimal representation of bytes take only two characters, so it would be only 28 characters in the end. This is the way to explore/experiment.
 
