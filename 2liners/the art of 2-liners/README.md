@@ -22,3 +22,12 @@ You'll find here a series of articles about writing two-liners in Applesoft.
 * Working with custom assembly routines
   * The 1-byte taking up to 3-byte problem
   * [SCRN/PLOT your sound routine](SCRN_PLOT_your_sound_routine.md)
+
+
+
+
+
+
+---
+#### Licence
+All code and content in these pages, except noted otherwise, is copyright François Vander Linden. And although you're free to use and modify them, honesty suggests you give proper credit when due. And if you plan to use what's in here for ANY kind of commercial project, this is not allowed. Please contact me first: don't worry, I might let you use my stuff anyway.
