@@ -21,4 +21,4 @@ You'll find here a series of articles about writing two-liners in Applesoft.
   * Taking control of the interpreter
 * Working with custom assembly routines
   * The 1-byte taking up to 3-byte problem
-  * SCRN/PLOT your sound routine
+  * [SCRN/PLOT your sound routine](SCRN_PLOT_your_sound_routine.md)
