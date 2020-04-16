@@ -99,18 +99,18 @@ If this code was in $400 (TEXT page 1), it would display like this:
 There are 3 INVERSE characters (byte value < 64), one FLASH character (byte value between 64 and 127), 9 NORMAL characters (byte value between 160 and 255) and 1 non-``PRINT``able character (value between 128 and 159).
 To reproduce this we would have to do the following:
 ```
-HOME:                 REM   4 chars (not counted)
-NORMAL:               REM   6+1 chars
-?"&G$F-0@HP}JPu":     REM +16+1 chars = 24 chars
-POKE 1025,7: POKE1027,6: POKE1029,48: POKE1031,136: POKE1037,96     : REM +58 chars = 82 chars
+10 HOME:                 REM   4 chars (not counted)
+20 NORMAL:               REM   6+1 chars
+30 ?"&G$F-0@HP}JPu":     REM +16+1 chars = 24 chars
+40 POKE 1025,7: POKE1027,6: POKE1029,48: POKE1031,136: POKE1037,96     : REM +58 chars = 82 chars
 ```
 This is still 82 characters, not counting the ``HOME`` instruction. This instruction is needed for the code to work but is usually there nonetheless in most 2-liners.
 
 If we have a 80-column card we can also use the following code:
 ```
-HOME
-?"<CTRL-D>PR#3"       : REM 8+1 chars
-?"<CTRL-Q>&<CTRL-O>G<CTRL-N>$<CTRL-O>F<CTRL-N>-<CTRL-O>0<CTRL-N>@HP}JPu<CTRL-O>`<CTRL-N>"     : REM +26 chars = 35 chars
+10 HOME
+20 ?"<CTRL-D>PR#3"       : REM 8+1 chars
+30 ?"<CTRL-Q>&<CTRL-O>G<CTRL-N>$<CTRL-O>F<CTRL-N>-<CTRL-O>0<CTRL-N>@HP}JPu<CTRL-O>`<CTRL-N>"     : REM +26 chars = 35 chars
 ```
 
 Explanation:
@@ -120,7 +120,7 @@ Explanation:
 * ``<CTRL-N>`` while CTRL-N brings back NORMAL mode. Don't forget to end your string with a CTRL-N or you'll be in INVERSE mode after running the code
 * ``<CTRL-O>`<CTRL-N>`` there is no FLASH when using the 80-columns hardware, but instead we have an extended INVERSE mode. That's why we print the equivalent of that normally flashing space.
 
-(all these CTRL codes are explained in the 80-column cards manuals, for example https://www.apple.asimov.net/documentation/hardware/video/Apple%20IIe%20Extended%2080-Column%20Text%20Card%20%28Rev%20B%29.pdf)
+(all these CTRL codes are explained in the 80-column cards manuals, for example [here on Asimov]( https://www.apple.asimov.net/documentation/hardware/video/Apple%20IIe%20Extended%2080-Column%20Text%20Card%20%28Rev%20B%29.pdf) )
 
 The result is the following
 
@@ -130,11 +130,12 @@ As you can see the routine has been perfectly PRINTed into memory. This techniqu
 However, one must admit that typing all these CTRLs every time you modify your code is arduous. And of course, it means never scrolling the TEXT page or the routine would disappear. And also, TEXT display is noticeably slower than when the 80-column card is activated. You could deactivate it by adding ``CHR$(21)`` at the end of the ``PRINT`` statement but it costs you 8 more characters. 
 
 Well ... 43 characters is still outstanding.
+Could we do better ?
 
 ## POKEing Hexadecimal from Applesoft
+Hexadecimal representation of bytes take only two characters, so it would be only 28 characters in the end. Of course Applesoft doesn't handle hexadecimal but maybe there are workarounds ?
 
-Hexadecimal representation of bytes take only two characters, so it would be only 28 characters in the end. This is the way to explore/experiment.
-
+### First, a bad idea
 There are ways to send monitor commands via Applesoft but even the monitor does not accept less than 3 characters per byte, that is two characters for the byte + one space like "300:16 07 14 06 AD 30 C0 88 D0 FD CA D0 F5 60".
 Such a program would be like this (see http://nparker.llx.com/a2/shlam.html for more info)
 ```
@@ -146,23 +147,55 @@ As you can see, this is worse !
 
 The simple fact that we need 3 characters to "express" one byte is intolerable ...
 What if we could use hexadecimal (without spaces) right in Applesoft code ?
-Here's a possibility:
-The technique here is a double trick: first it uses the string stored in A$ directly from the Applesoft code (in $800), reading the bytes in A$ as stored in the program in $809 (decimal 2057).
-The second trick is that A$ contains "coded" hexadecimal code. An "A" equals to a "0" and a "P" equals to an "F" (ascii of "A" + 15).
-0->A, 1->B, 2->C, 3->D, 4->E, 5->F, 6->G, 7->H, 8->I, 9->J, A->K, B->L, C->M, D->N, E->O, F->P
 
-So, A6 07 A4 06 AD 30 C0 88 D0 FD CA D0 F5 60 translates to KG AH KE AG KN DA MA II NA PN MK NA PF GA
-And then we have :
+### Using strings to hold hexadecimal and then compute the value
+If we store our hexadecimal routine in a string we end up with this:
+```
+A$="A607A406AD30C088D0FDCAD0F560"
+```
+It's only 33 characters but as such it's unusable. It means we need to write code to parse the string.
+Something along the way of (not optimized yet):
+```
+10 A$="A607A406AD30C088D0FDCAD0F560"
+20 FOR I = 1 TO 28 STEP 2
+30 N = VAL(MID$(A$,I,1)) * 16 + VAL(MID$(A$,I+1,1))     : REM THIS WILL NOT WORK !
+40 POKE 768+I/2, N
+50 NEXT
+```
+Line 30 will not work because whenever we have a letter in ``A$``, ``VAL()`` will return zero.
+Line 30 is already 42 characters long and it will have to be more complex to handle A-F characters.
+Instead of writing conditional code, we could change A$ in such a way that the same computation is always applied.
+Let's code ``A$`` to something else.
+If we decide that hexadecimal "0" is coded as "A", "1" as "B", etc, we have the following:
+```
+10 A$="KGAHKEAGKNDAMAIINAPNMKNAPFGA"
+20 FOR I = 1 TO 28 STEP 2
+30 N = (ASC(MID$(A$,I,1))-65) * 16 + ASC(MID$(A$,I+1,1)) - 65
+30 N = ASC(MID$(A$,I,1)) * 16 + ASC(MID$(A$,I+1,1)) - 1105
+40 POKE 768 + I/2, N
+50 NEXT
+```
+As you can see there are two lines 30. The second one is an optimization of the previous one.
+If we combine line 40 and line 30 (``POKE 768+I/2, ASC( ...``) we have 112 characters !
 
+Can we do better ?
+## Using a string but without manipulating the string
+Starting with our coded ``A$`` string, instead of using ``MID$`` and ``ASC`` to get the value to ``POKE``, we could "read" the value directly from it's location in the code.
+
+```
 0 A$="KGAHKEAGKNDAMAIINAPNMKNAPFGA" : REM 33+1 chars
 1 S=768: FOR I = 2057 TO 2084 STEP 2: POKE S+N, (PEEK(I)-65)*16 + PEEK(I+1) - 65: N=N+1: NEXT: REM +74 chars = 108 chars
-
-That could be further reduced to
-0 A$="KGAHKEAGKNDAMAIINAPNMKNAPFGA" : REM 33+1 chars
 1 S=768: FOR I = 2057 TO 2084 STEP 2: POKE S+N, 16*PEEK(I) + PEEK(I+1) - 1105: N=N+1 : NEXT: REM +71 chars = 105 chars
+```
+(again the second line 1 is an optimization of the first).
+Explanation:
+The Applesoft code begins in $800 (2048). The first letter of A$ is in position $809 (2057). We simply read those values directly from the code location.
 
-Not really helping us !
+All in all, it's still 105 characters long !
 
+Can we do better ?
+
+##
 So here comes the technique I've developed for this particular case.
 Notice that it can be used for all kinds of subroutines .... just be aware that we're "printing" routines and that the TEXT page lines are not sequential (line 1 is not in $400+40 chars)
 
