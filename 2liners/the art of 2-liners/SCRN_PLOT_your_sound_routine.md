@@ -320,3 +320,7 @@ The 24 bytes routine uses 95 characters by itself ... it's almost as good as the
 I hope you enjoyed this little tutorial on "how I did it" ! .... 
 
 Can you do better than this ? If so, don't hesitate to post, I'd be happy to see what you've come up with !
+
+---
+#### Licence
+See [license](LICENSE.md)
