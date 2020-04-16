@@ -104,7 +104,7 @@ NORMAL:               REM   6+1 chars
 ?"&G$F-0@HP}JPu":     REM +16+1 chars = 24 chars
 POKE 1025,7: POKE1027,6: POKE1029,48: POKE1031,136: POKE1037,96     : REM +58 chars = 82 chars
 ```
-This is still 82 characters, not counting the ``HOME`` instruction. This instruction is needed for the code to work but usually there nonetheless in most 2-liners.
+This is still 82 characters, not counting the ``HOME`` instruction. This instruction is needed for the code to work but is usually there nonetheless in most 2-liners.
 
 If we have a 80-column card we can also use the following code:
 ```
@@ -120,12 +120,16 @@ Explanation:
 * ``<CTRL-N>`` while CTRL-N brings back NORMAL mode. Don't forget to end your string with a CTRL-N or you'll be in INVERSE mode after running the code
 * ``<CTRL-O>`<CTRL-N>`` there is no FLASH when using the 80-columns hardware, but instead we have an extended INVERSE mode. That's why we print the equivalent of that normally flashing space.
 
+(all these CTRL codes are explained in the 80-column cards manuals, for example https://www.apple.asimov.net/documentation/hardware/video/Apple%20IIe%20Extended%2080-Column%20Text%20Card%20%28Rev%20B%29.pdf)
+
 The result is the following
 
 ![screen capture](img/printsoundroutine80.gif)
 
 As you can see the routine has been perfectly PRINTed into memory. This technique is perfect if you have a 80-column card.
-However, one must admit that typing all these CTRLs every time you modify your code is arduous. And of course, it means never scrolling the TEXT page or the routine would disappear. And also, TEXT display is noticeably slower than when the 80-column card is activated. You could deactivate it by adding ``CHR$(21)`` at the end of the ``PRINT`` statement but it costs you 8 more characters. Still 43 characters is still outstanding.
+However, one must admit that typing all these CTRLs every time you modify your code is arduous. And of course, it means never scrolling the TEXT page or the routine would disappear. And also, TEXT display is noticeably slower than when the 80-column card is activated. You could deactivate it by adding ``CHR$(21)`` at the end of the ``PRINT`` statement but it costs you 8 more characters. 
+
+Well ... 43 characters is still outstanding.
 
 ## POKEing Hexadecimal from Applesoft
 
