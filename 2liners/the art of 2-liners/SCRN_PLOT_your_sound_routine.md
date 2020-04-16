@@ -90,7 +90,7 @@ A6 07 A4 06 AD 30 C0 88 D0 FD CA D0 F5 60
 ```
 This is only 28 characters if we omit spaces but 41 if we count spaces.
 
-## PRINT code ?
+## PRINT a 6502 subroutine
 Since ASCII is the shortest as it takes only 14 bytes, could we use ``PRINT`` to print the code in TEXT page 1 ?
 If this code was in $400 (TEXT page 1), it would display like this:
 
@@ -203,18 +203,20 @@ Starting with our coded ``A$`` string, instead of using ``MID$`` and ``ASC`` to 
 ```
 (again the second line 1 is an optimization of the first).
 Explanation:
-The Applesoft code begins in $800 (2048). The first letter of A$ is in position $809 (2057). We simply read those values directly from the code location.
+The Applesoft code begins in $800 (2048). The first letter afte ``A$="`` is in location $809 (2057) in memory. We simply read those values directly from there.
 
 All in all, it's still 105 characters long !
 
-There are variations to this technique: instead of having an assignment to a variable we could have a ``DATA``or a ``REM`` and access its precise memory location in the code. ``DATA`` is in fact shorter of 1 character (because you don't need quotes. ``REM``has the inconvenient of having to be used as the last statement of the line
+There are variations to this technique: instead of having an assignment to a variable we could have a ``DATA``or a ``REM`` and access its precise memory location in the code. ``DATA`` is in fact shorter of 1 character (because you don't need quotes. ``REM``has the inconvenient of having to be used as the last statement of the line.
+
+Anyway none of these variations are short enough.
 
 Can we do better ? Of course.
 
 ## New technique: PRINT/PLOT hexadecimal
 So here comes the technique I've developed for this particular case.
 
-Notice that it can be used for all kinds of subroutines .... just be aware that we're "printing" routines and that the TEXT page lines are not sequential (line 1 is not in $400+40 chars)
+Notice that it can be used for all kinds of subroutines .... just be aware that we're "printing" routines and that the TEXT page lines are not sequential (line 1 is not in $400+40 chars). It works with any value from 0 to 255 and it's almost as easy as to type the actual hexadecimal values in the monitor.
 
 This new (?) technique involves using four very simple instructions: PRINT, SCRN, COLOR and PLOT.
 
