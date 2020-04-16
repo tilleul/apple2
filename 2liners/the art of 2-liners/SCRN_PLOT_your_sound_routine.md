@@ -1,4 +1,4 @@
-# Introduction
+# SCRN/PLOT your sound routine (or any other)
 This aricle will explain a new (?) technique to poke subroutines using Applesoft (without using POKEs at ALL :D ) and actually spare several characters if you're into 2-liners.
 
 ## Generating various sounds in 2-liners.
@@ -261,7 +261,11 @@ This method can be used to POKE/PLOT longer routines ... just make sure to take 
 
 Of course, if you need line 1 of TEXT or line 0 of GR, you'll see the routine ... it's probably better using Hires 2-liners....
 
-One last thing.
+Can we do even better ? Not that I know of if you try to use pseudo-hexadecimal in your code.
+
+
+
+## One last thing
 
 Roger Wagner's assembly lines contains another routine to handle sound that might be very useful for 2-liners.
 Instead of using 
