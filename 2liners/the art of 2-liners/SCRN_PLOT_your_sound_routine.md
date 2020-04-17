@@ -258,16 +258,20 @@ Notice that it can be used for all kinds of subroutines .... just be aware that 
 How does it work ?
 ### PRINT
 First we start from our 14 routine bytes: 
-```A6 07 A4 06 AD 30 C0 88 D0 FD CA D0 F5 60```
+```
+A6 07 A4 06 AD 30 C0 88 D0 FD CA D0 F5 60
+```
 
 We leave every number as it is, but we replace all the letters with new letters according to this:
 
 A becomes J, B becomes K, C->L, D->M, E->N and F becomes O.
 
 We now have 
-```J6 07 J4 06 JM 30 L0 88 M0 OM LJ M0 O5 60```
+```
+J6 07 J4 06 JM 30 L0 88 M0 OM LJ M0 O5 60
+```
 
-We now that TEXT page 1 and Lores page 1 share the same memory location, it starts in $400. Also one line of text is represented as 2 lines of lores graphics.
+We know that TEXT page 1 and Lores page 1 share the same memory location, it starts in $400. Also one line of text is represented as 2 lines of lores graphics.
 
 We are going to print every low-nibble (4 bits) of each character on line 1 of TEXT (which is line 0 of GR), this means we rearrange all  characters in even positions in the string in another string.
 ```
@@ -288,7 +292,7 @@ If you watch closely, you'll notice that the low nibble is already in place in $
 We must find a way to leave unchanged the low nibble of each byte in line 1 and use the low nibble of each byte in line 2 as the high nibble of each byte in line 1.
 
 ### SCRN, COLOR & PLOT
-As you know, SCRN will return the color of a "point" in Lo-res. You also know that one TEXT character is represented as 2 "vertical" points of various colors in lores.
+As you know, ``SCRN`` will return the color of a "point" in Lo-res. You also know that one TEXT character is represented as 2 "vertical" points of various colors in lores.
 
 Here's what our two PRINTs look like in GR:
 
@@ -313,6 +317,11 @@ Here's the code:
 4 COLOR = SCRN(I,2): REM +15+1 chars = 63 chars     we have a value 0-15
 5 PLOT I,1: REM +7+1 chars = 71 chars     we PLOT it on line 1, actually adding 16*color to the byte in $400+I
 6 NEXT : REM +4 chars = 75 chars
+
+100 REM LET'S HEAR SOMETHING
+120 FOR I = 0 TO 255
+130 POKE 6,I: POKE 7, 10 : CALL 1024
+140 NEXT
 ```
 Even with the ``HOME`` statement at first (which is needed but might already be included in your 2-liner), we have 75+4+1 chars = 80 chars
 
