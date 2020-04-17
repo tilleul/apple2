@@ -1,14 +1,14 @@
 # SCRN/PLOT your 6502/ASM sound routine (or any other)
-This article will explain a new (?) technique to poke ASM (machine language) subroutines using Applesoft (without using POKEs at ALL) and actually spare several characters if you're into 2-liners.
+This article will explain a new (?) technique to poke ASM (machine language) subroutines using Applesoft (without using ``POKE``s at ALL) and actually spare several characters if you're into 2-liners.
 
 ## 6502 Subroutines in 2-liners
-Because 2-liners have to be short (maximum 239 characters per line of code), 6502 subroutines are usually short too. These routines might solve in a few bytes complex problems like generating a tune, scrolling a graphics screen or do a repetitive task best handled by machine code.
+Because 2-liners have to be short (maximum 239 characters per line of code), 6502 subroutines used in 2-liners are usually short too. These routines might solve in a few bytes complex problems like generating a tune, scrolling a graphics screen or do a repetitive task best handled by machine code.
 
 Most of the time these routines are called using the ``CALL`` statement and if it takes parameters those are ``POKE``d beforehand.
 
-Because every character count, sometimes it's best to create "&" routines 
+Because every character count, sometimes it's best to create "&" routines, USR() routines or routines that can be called in the form of ``CALL addr, param1, param2, ...``
 
-## Generating various sounds in 2-liners.
+## Generating sounds in 2-liners
 Using a sound generating routine, we are going to see different techniques to interface assembly routines with Applesoft in the context of 2-liners.
 
 The routines will be taken of the book "Assembly Lines" by Roger Wagner. The book is available freely as a PDF. It is a goldmine. I'm not sure if this is legal or not but whatever, here's the link to download a copy.
@@ -17,11 +17,11 @@ https://archive.org/details/AssemblyLinesCompleteWagner/mode/2up
 ### How it usually works
 We all know that the speaker of the Apple II is rather limited. What's worse is that there's no way in Applesoft to generate other sounds than
 - a beep, using ``PRINT CHR$(7)``
-- a click, by accessing address 49200, for example using a ``PEEK`` or a ``POKE``
+- a click, by accessing address 49200 (or -16336), for example using a ``PEEK`` or a ``POKE`` (the latter being shorter)
 
 The latest technique is called 1-bit sound. It sends a voltage signal to the Apple speaker that will just produce a click because it has been "activated". It is 1-bit because it's either on or off: we're sending voltage or not.
 
-To generate different tones we need to activate the speaker in two nested loops. The inner loop controls the pitch while the outer loop controls the duration ... 
+To generate different tones we need to rapidly activate the speaker in two nested loops. The inner loop controls the pitch while the outer loop controls the duration ... 
 This is usually done with some 6502 using delays between accesses to memory 49200 ($C030) ...
 
 One of those routines is provided in Assembly Lines book by Roger Wagner (p. 57).
@@ -46,14 +46,14 @@ POKE 6, P: POKE 7, D: CALL S
 Where P is the "pitch", D is the duration and S equals 768 ($300)...
 
 ## Integration with Applesoft: the regular way
-But if we want this routine available for Applesoft, we have to either load it from disk (which is not allowed in a 2-liner) or to POKE it into memory before usage.
+If we want this routine available for Applesoft, we have to either load it from disk (which is not allowed in a 2-liner) or to POKE it into memory before usage.
 Like this:
 ```
 10 S=768: FOR L = 0 TO 13 : READ V : POKE S+L ,V : NEXT L: REM 38 + 1 character (":")
 20 DATA 166, 7, 164, 6, 173, 48, 192, 136, 208, 253, 202, 208, 245, 96:  REM +53 chars = 92 chars
 ```
 
-As you can see, this takes 92 characters if we were to use it in a 2-liner ... 
+As you can see, this takes 92 characters if we were to use it in a 2-liner. 
 And each call to generate a sound would take 21 additional characters assuming we use variables for pitch and duration:
 ```
 POKE 6,P : POKE 7,D : CALL S
@@ -68,21 +68,20 @@ for example (not all memory location work):
 10 FOR L = 60 TO 73 : READ V : POKE L,V : NEXT L:  REM 31+1 chars
 20 DATA 166, 7, 164, 6, 173, 48, 192, 136, 208, 253, 202, 208, 245, 96:  REM +53 chars = 85 chars
 ```
-It's reduced to 85 chars ! But each call to generate a sound would take 22 additional characters (because we didn't store the calling address in S)
+It's reduced to 85 chars ! But each call to generate a sound now takes 22 additional characters (because we didn't store the calling address in S).
 ```
 POKE 6,P : POKE 7,D : CALL 60
 ```
-
-But this is still a lot of bytes just to emit an interesting (?) sound ...
-## The main problem: 1-byte value expressed in 3 bytes
+This is still a lot of bytes just to emit an interesting (?) sound ...
+## The main problem: 1-byte values expressed in 3 bytes
 
 The data we have to poke, ranges from 0 to 255 ...
-It means that in Applesoft, values above 9, will take 2 bytes (2 characters), while values above 99 will take 3 bytes !
-It feels like a waste when you know that a value of 100 could be represented as
+It means that in Applesoft, values above 9, will take 2 characters, while values above 99 will take 3 characters !
+It feels like a waste when you know that a value of 100 could be represented either as
 * a character (``d``) in ASCII, taking one byte to represent
 * an hexadecimal value of ``64``, taking only 2 bytes to represent
 
-Also using DATA and colons to separate each value adds another character, so a value of 100 is actually taking 4 bytes !
+Also using ``DATA`` requires colons to separate each value. This adds another character, so a value of 100 is actually taking 4 characters !
 
 The DATA line itself in our example, if we omit "DATA", is 49 characters long for only 14 bytes worth !
 Is it possible to reduce this ?
@@ -91,7 +90,7 @@ Here are the values again (49 characters, omitting spaces):
 ```
 166, 7, 164, 6, 173, 48, 192, 136, 208, 253, 202, 208, 245, 96
 ```
-In hexa this becomes:
+In hexadecimal this becomes:
 ```
 A6 07 A4 06 AD 30 C0 88 D0 FD CA D0 F5 60
 ```
@@ -113,21 +112,24 @@ To reproduce this we would have to do the following:
 ```
 This is still 82 characters, not counting the ``HOME`` instruction. This instruction is needed for the code to work but is usually there nonetheless in most 2-liners.
 
-If we have a 80-column card we can also use the following code:
+## PRINT using the 80-column card
+If we have a 80-column card we can actually insert INVERSE and NORMAL statements by typing CTRL characters in the string to print.
+
+Here's how:
 ```
 10 HOME
 20 ?"<CTRL-D>PR#3"       : REM 8+1 chars
-30 ?"<CTRL-Q>&<CTRL-O>G<CTRL-N>$<CTRL-O>F<CTRL-N>-<CTRL-O>0<CTRL-N>@HP}JPu<CTRL-O>`<CTRL-N>"     : REM +26 chars = 35 chars
-40 POKE 1031,136           : REM +12 chars = 47 chars
+30 ?"<CTRL-Q>&<CTRL-O>G<CTRL-N>$<CTRL-O>F<CTRL-N>-<CTRL-O>0<CTRL-N>@HP}JPu<CTRL-O>`<CTRL-N>"     : REM +26+1 chars = 36 chars
+40 POKE 1031,136           : REM +12 chars = 48 chars
 ```
 
 Explanation:
-* ``?"<CTRL-D>PR#3"`` activates the 80-column card. A carriage return is needed for this command, that's why it's separated from the rest of the code. Once this has been executed, we are in 80 columns mode, it means every other character is actually in auxiliary memory, so we need to deactivate 80-columns mode ASAP but not the 80-column hardware.
+* ``?"<CTRL-D>PR#3"`` activates the 80-column card. A carriage return is needed for this command, that's why it's a separated statement. Once this has been executed, we are in 80 columns mode, it means every other character is actually in auxiliary memory, so we need to deactivate 80-columns mode ASAP but not the 80-column hardware.
 * ``<CTRL-Q>`` CTRL-Q goes back to 40 columns mode with the 80-column hardware still active.
 * ``<CTRL-O>`` every CTRL-O activates INVERSE mode
 * ``<CTRL-N>`` while CTRL-N brings back NORMAL mode. Don't forget to end your string with a CTRL-N or you'll be in INVERSE mode after running the code
-* ``<CTRL-O>`<CTRL-N>`` there is no FLASH when using the 80-columns hardware, but instead we have an extended INVERSE mode. That's why we print the equivalent of that normally flashing space.
-* ``POKE 1031,136`` so far we saved a lot of characters, unfortunately some characters cannot be ``PRINT``ed. That's the case of every value between 128 and 159 as well as the value 255. That's why we need to directly POKE these values in the appropriate memory spot.
+* ``<CTRL-O>`<CTRL-N>`` there is no FLASH when using the 80-columns hardware, but instead we have an extended INVERSE mode (that will print lower-case characters in INVERSE for example). The "flashing space" is actually represented by that apostrophe in INVERSE.
+* ``POKE 1031,136`` so far we saved a lot of characters, unfortunately some characters cannot be ``PRINT``ed. That's the case of every value between 128 and 159 as well as the value 255. That's why we need to directly ``POKE`` these values in the appropriate memory spot.
 
 (all these CTRL codes are explained in the 80-column cards manuals, for example [here on Asimov]( https://www.apple.asimov.net/documentation/hardware/video/Apple%20IIe%20Extended%2080-Column%20Text%20Card%20%28Rev%20B%29.pdf) )
 
@@ -135,7 +137,7 @@ The result is the following
 
 ![screen capture](img/printsoundroutine80.gif)
 
-As you can see the routine has been perfectly PRINTed into memory (+ that one POKE). 
+As you can see the routine has been perfectly ``PRINT``ed into memory (+ that one ``POKE``). 
 
 This technique is great if you have a 80-column card.
 
@@ -145,11 +147,15 @@ Of course as with every other ``PRINT`` instead of ``POKE`` technique, it means 
 
 Also, TEXT display is noticeably slower when the 80-column card is activated. You could deactivate it by adding ``CHR$(21)`` at the end of the ``PRINT`` statement but it costs you 8 more characters. 
 
-Well ... 47+8 = 55 characters. This is still outstanding.
+Well ... 48+8 = 56 characters. This is still outstanding.
 
-Apart from needing a 80-column card, the main drawback to this technique is that for some routines, you'll need the help of a POKE or two because characters from $80->$9F (128 to 159) and $FF (255) cannot be ``PRINT``ed. But as this will only take 11-12 chars more it might be acceptable in most of the cases.
+Apart from needing a 80-column card, the main drawback to this technique is that for some routines, you'll need the help of a ``POKE`` or two because characters from $80->$9F (128 to 159) and $FF (255) cannot be ``PRINT``ed. 
 
-If you have 2 un``PRINT``able characters it will take 24 additional characters to POKE. This brings us to a total of 79 bytes ! An additional un``PRINT``able character and we are above 100 characters !
+In fact, we we're lucky that our routine does not have more bytes with a value between $80 and $9F because this is where all the ``STA``, ``STX`` and ``STY`` 6502 opcodes are and these are very common instructions.
+
+It will then take 11-12 additional characters per un``PRINT``able character to ``POKE`` it plus one for the separating colon !
+
+If you have two un``PRINT``able characters it will take 23-25 additional characters. This brings us to a total of 78-80 bytes ! A third un``PRINT``able character and we are reaching the 92 characters of the "classic" DATA/READ technique.
 
 There must be a better more general way !
 
@@ -157,8 +163,8 @@ There must be a better more general way !
 Hexadecimal representation of bytes take only two characters, so it would be only 28 characters in the end. Of course Applesoft doesn't handle hexadecimal but maybe there are workarounds ?
 
 ### First, a bad idea
-There are ways to send monitor commands via Applesoft but even the monitor does not accept less than 3 characters per byte, that is two characters for the byte + one space like "300:16 07 14 06 AD 30 C0 88 D0 FD CA D0 F5 60".
-Such a program would be like this (see http://nparker.llx.com/a2/shlam.html for more info)
+There are ways to send monitor commands via Applesoft but even the monitor does not accept less than 3 characters per byte, that is two characters for the byte plus one space like "300:16 07 14 06 AD 30 C0 88 D0 FD CA D0 F5 60".
+Sending monitor commands via Applesoft works like this (see http://nparker.llx.com/a2/shlam.html for more info)
 ```
 100 A$="300:A6 07 A4 06 AD 30 C0 88 D0 FD CA D0 F5 60 N D823G": REM  58+1 chars
 110 FOR X=1 TO LEN(A$): POKE 511+X,ASC(MID$(A$,X,1))+128: NEXT: REM +52+1 chars = 112 chars
@@ -174,7 +180,7 @@ If we store our hexadecimal routine in a string we end up with this:
 ```
 A$="A607A406AD30C088D0FDCAD0F560"
 ```
-It's only 33 characters but as such it's unusable. It means we need to write code to parse the string.
+It's only 33 characters but as such it's unusable. We need to write code to parse the string and convert each hexadecimal to decimal.
 Something along the way of (not optimized yet):
 ```
 10 A$="A607A406AD30C088D0FDCAD0F560"
@@ -185,7 +191,7 @@ Something along the way of (not optimized yet):
 ```
 Line 30 will not work because whenever we have a letter in ``A$``, ``VAL()`` will return zero.
 Line 30 is already 42 characters long and it will have to be more complex to handle A-F characters.
-Instead of writing conditional code, we could change A$ in such a way that the same computation is always applied.
+Instead of writing conditional code, we could change ``A$`` in such a way that the same computation is always applied.
 Let's code ``A$`` to something else.
 If we decide that hexadecimal "0" is coded as "A", "1" as "B", etc, we have the following:
 ```
@@ -201,7 +207,7 @@ If we combine line 40 and line 30 (``POKE 768+I/2, ASC( ...``) we have 112 chara
 
 Can we do better ?
 ### Using a string but without manipulating the string
-Starting with our coded ``A$`` string, instead of using ``MID$`` and ``ASC`` to get the value to ``POKE``, we could "read" the value directly from it's location in the code.
+Starting with our coded ``A$`` string, instead of using ``MID$()`` and ``ASC()`` to get the value to ``POKE``, we could "read" the value directly from it's location in the code.
 
 ```
 0 A$="KGAHKEAGKNDAMAIINAPNMKNAPFGA" : REM 33+1 chars
@@ -210,9 +216,29 @@ Starting with our coded ``A$`` string, instead of using ``MID$`` and ``ASC`` to 
 ```
 (again the second line 1 is an optimization of the first).
 Explanation:
-The Applesoft code begins in $800 (2048). The first letter afte ``A$="`` is in location $809 (2057) in memory. We simply read those values directly from there.
+The Applesoft code begins in \$800 (2048). The first letter ("K") after ``A$="`` is in location $809 (2057) in memory. We simply read those values directly from there.
 
-All in all, it's still 105 characters long !
+Here's a screenshot of the code and how it's stored in memory.
+
+![screen capture](img/hexstring_incode.gif)
+
+* \$800: always $00
+* $801-$802: memory location where the program's second line begins (the first line always begins in $803). The second line begins in $0827.
+* $803-$804: line number (zero)
+* $805-$826: the code of line zero
+* $805: equals $41, that is ASCII #65, that is "A"
+* $806: equals $24, that's ASCII #36, that's "\$"
+* $807: equals $D0, this is not an ascii code, it's an Applesoft token representing "="
+* $808: equals $22, that's ASCII #34, this is the quote sign (")
+* $809-$824: our string in ASCII
+* $825: the closing quote
+* $826: $00 means this is the end of the line
+* $827-$828: memory location for the third line (does not exist)
+* $829-$830: line number (1)
+* $831-$860: code for line 1
+* $861-$862: memory location for the 4th line. As it's ``00 00`` it means there are no fourth line (and no third line either).
+
+Anyway, all in all, our Applesoft code still takes 105 characters long !
 
 There are variations to this technique: instead of having an assignment to a variable we could have a ``DATA``or a ``REM`` and access its precise memory location in the code. ``DATA`` is in fact shorter of 1 character (because you don't need quotes. ``REM``has the inconvenient of having to be used as the last statement of the line.
 
