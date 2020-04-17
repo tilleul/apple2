@@ -1,4 +1,4 @@
-# SCRN/PLOT your 6502/ASM sound routine (or any other)
+# PRINT/PLOT your 6502/ASM sound routine (or any other)
 This article will explain a new (?) technique to poke ASM (machine language) subroutines using Applesoft (without using ``POKE``s at ALL) and actually spare several characters if you're into 2-liners.
 
 ## 6502 Subroutines in 2-liners
@@ -247,29 +247,37 @@ Anyway none of these variations are short enough.
 Can we do better ? Of course.
 
 ## New technique: PRINT/PLOT hexadecimal
-So here comes the technique I've developed for this particular case.
+So here comes the technique I've developed to help Applesoft write hexadecimal values in memory.
 
-Notice that it can be used for all kinds of subroutines .... just be aware that we're "printing" routines and that the TEXT page lines are not sequential (line 1 is not in $400+40 chars). It works with any value from 0 to 255 and it's almost as easy as to type the actual hexadecimal values in the monitor.
+It involves using four very simple instructions: PRINT, SCRN, COLOR and PLOT.
 
-This new (?) technique involves using four very simple instructions: PRINT, SCRN, COLOR and PLOT.
+Using the GR/TEXT capabilities of Applesoft we will poke a 6502 routine in TEXT page 1.
 
-We will be using the GR/TEXT capabilities of Applesoft to poke a program in TEXT page 1.
+Notice that it can be used for all kinds of subroutines .... just be aware that we're ``PRINT``ing values in memory and that the TEXT page lines are not sequential (line 1 is not in $400+40 chars). It works with any value from 0 to 255 and it's almost as easy as to type the actual hexadecimal values in the monitor.
 
 How does it work ?
 ### PRINT
-First we start from our 14 routine bytes: A6 07 A4 06 AD 30 C0 88 D0 FD CA D0 F5 60
+First we start from our 14 routine bytes: 
+```A6 07 A4 06 AD 30 C0 88 D0 FD CA D0 F5 60```
 
 We leave every number as it is, but we replace all the letters with new letters according to this:
 
 A becomes J, B becomes K, C->L, D->M, E->N and F becomes O.
 
-We now have J6 07 J4 06 JM 30 L0 88 M0 OM LJ M0 O5 60
+We now have 
+```J6 07 J4 06 JM 30 L0 88 M0 OM LJ M0 O5 60```
 
-We will now take advantage of the GR/TEXT screen and the SCRN function.
+We now that TEXT page 1 and Lores page 1 share the same memory location, it starts in $400. Also one line of text is represented as 2 lines of lores graphics.
 
-We are going to print every low-nibble (4 bits) of each char on line 1 of TEXT (which is line 0 of GR), this means we print "6746M0080MJ050"
+We are going to print every low-nibble (4 bits) of each character on line 1 of TEXT (which is line 0 of GR), this means we rearrange all  characters in even positions in the string in another string.
+```
+PRINT "6746M0080MJ050"
+```
 
-And we will print every high-nibble of each char on line 2 of TEXT (which is line 2 of GR), this means we print "J0J0J3L8MOLMO6"
+And we will print every high-nibble of each character on line 2 of TEXT (which is line 2 of GR). We rearrange all characters in odd positions in another string
+```
+PRINT "J0J0J3L8MOLMO6"
+```
 
 The result is the following:
 
@@ -292,9 +300,11 @@ The colors in line 0 correspond to the low-nibble (4 bits) of the bytes in $400-
 
 And of course, the same goes for lines 2 & 3... Now all we have to do is copy the points in GR line 2 (low-nibbles of bytes in $480-$48D) to line 1 (high nibbles of bytes in $400-$40D).
 
-The result is that in line 0 and 1 of GR, we'll have our sound routine.
+We do this simply by getting the color of the points in line 2 with a ``SCRN(X,2)``, change the color using the ``COLOR`` statement and ``PLOT`` a new point in line 1 with that color.
 
-Here's the resulting code:
+The result is that in line 0 and 1 of GR (or TEXT line 1), we'll have our sound routine.
+
+Here's the code:
 ```
 0 HOME: REM 4 chars (not counted)
 1 ?"6746M0080MJ050": REM  17+1 chars
@@ -304,16 +314,15 @@ Here's the resulting code:
 5 PLOT I,1: REM +7+1 chars = 71 chars     we PLOT it on line 1, actually adding 16*color to the byte in $400+I
 6 NEXT : REM +4 chars = 75 chars
 ```
-Even with the "HOME" statement at first (which is needed but might already be included in your 2-liner), we have 75+4+1 chars = 80 chars
+Even with the ``HOME`` statement at first (which is needed but might already be included in your 2-liner), we have 75+4+1 chars = 80 chars
 
 This is still better than the traditional POKE technique ...
 
+The main routine (the ``FOR/NEXT`` loop) "only" takes 39 characters.
+
 This method can be used to POKE/PLOT longer routines ... just make sure to take into account the fact that one line is 40 chars max, so if you need to handle more bytes, simply add a embracing loop to repeat as needed ... don't forget you can do "NEXT I,J" instead of "NEXT:NEXT" !
 
-Of course, if you need line 1 of TEXT or line 0 of GR, you'll see the routine ... it's probably better using Hires 2-liners....
-
 Can we do even better ? Not that I know of if you try to use pseudo-hexadecimal in your code.
-
 
 
 ## One last thing
@@ -349,11 +358,6 @@ The 24 bytes routine uses 95 characters by itself ... it's almost as good as the
 130 CALL 1024 , I, 10
 140 NEXT
 ```
-
-I hope you enjoyed this little tutorial on "how I did it" ! .... 
-
-Can you do better than this ? If so, don't hesitate to post, I'd be happy to see what you've come up with !
-
 ---
 #### Licence
 See [license](LICENSE.md)
