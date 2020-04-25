@@ -22,7 +22,7 @@ You'll find here a series of articles about writing two-liners in Applesoft.
 * Working with custom assembly routines
   * The 1-byte taking up to 3-byte problem
   * [SCRN/PLOT your sound routine](SCRN_PLOT_your_sound_routine.md)
-
+* The big list of 2-liner tricks for every Applesoft instruction
 
 
 
