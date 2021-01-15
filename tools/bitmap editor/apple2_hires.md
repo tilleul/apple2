@@ -22,7 +22,7 @@ So to draw the entire line 0 we could `RUN` this code
     POKE 8232,255
 
 will not plot 7 pixels on line 1 but on line 64 !
-If we slightly modify the above code to POKE the first 3 lines in memory, we have
+If we slightly modify the above code to POKE the first 3 lines as stored in memory, we have
 
     10 HGR
     20 A = 8192: REM $2000
@@ -34,5 +34,10 @@ If we slightly modify the above code to POKE the first 3 lines in memory, we hav
     80 PRINT A
 
 The result is this
-
 ![screenshot](img/apple2_hires_lines0-64-128.png)
+
+We have drawn line 0, line 64 and line 128 !
+Now the next address to `POKE` seems to be 8312 ($2078 in hex -- the resulting value in our variable `A`).
+
+But if we do `POKE 8312, 255` we don't see any change on the screen ! This is because we have reached one the hires screen holes !
+In fact, all lines between 128 and 191 in RAM have 8 unused bytes at their end. Those 8x64 lines represent 512 bytes. Those are the missing bytes in first computation.
