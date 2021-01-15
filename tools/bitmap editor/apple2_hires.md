@@ -269,9 +269,9 @@ The results are very informative. Let's zoom in a bit.
 ![screenshot](img/apple2_hires_poke0-128detail.png)
 
 The first line of pixels is black, corresponding to 0.
-POKEing 1 in the next line produced a violet dot in x=0, while POKEing 2 resulted in a green dot in x=1 and finally, POKEing 3 created two white dots, one in position 0 and the other in position 1.
+`POKE`ing 1 in the next line produced a violet dot in x=0, while `POKE`ing 2 resulted in a green dot in x=1 and finally, POKEing 3 created two white dots, one in position 0 and the other in position 1.
 
-From these 4 POKE, we can already see that 
+From these 4 `POKE`, we can already see that 
 #### 1. Plotting is inverted compared to the order of the representation of a binary value.
 
 | dec | binary | result |
@@ -302,4 +302,39 @@ To understand what color a pixel is going to be rendered, one must consider the 
 
 This might be summarised as the following:
 * if the pixel is off, it's rendered black except if both its neighbours are on, in which case it's rendered using the color of its neighbours' columns
-* if the pixel is on, it's rendered white except if both its neighbours are off, in which cas it's rendered using the color of his own column
+* if the pixel is on, it's rendered white except if both its neighbours are off, in which cas it's rendered using the color of his own column.
+
+And we can continue our observations:
+#### 6. It's impossible to plot more than one pair of consecutive colored pixels: colored pixels are always odd in number
+#### 7. To plot only two consecutive colored pixels, they must be surrounded by two white pixels on one side and two black pixels on the other side
+#### 8. Single dot (then colored) pixels must be surrounded by two pairs of black pixels but the minimum distance between two single dot pixels of the same color is 3 black pixels. The minimum distance between two single dot pixels of different colors is 2 pixels.
+
+Now what about values above 128 ?
+Let's edit line 20 of the previous program
+
+    20 FOR Y = 0 TO 160
+
+![screenshot](img/apple2_hires_poke0-160detail.png)
+Yes ! New colors !
+
+So, the 7th bit switches to a different color palette. Pixels in this palette follow the same rules as the previous palette. But we can add more observations.
+#### 9. A second palette is selected when the 7th bit (AKA the "hi-bit") is ON
+#### 10. Blue is on even columns and orange/red is on odd columns ... HEY WAIT !! LOOK CLOSELY !
+#### 11. Blue pixels are displayed in-between the columns of the violet/green pixels while red pixels are displayed in-between the columns of the green/violet pixels.
+
+How weird is that ?
+Let's try this:
+
+    10 HGR: N=128: YY=0
+    20 FOR Y = 0 TO 127
+    30 A = INT(Y/64): REM A-ZONE
+    40 B = INT( (Y - 64 * A) / 8): REM B-ZONE
+    50 C = INT(Y - 64 * A - 8 * B): REM C-ZONE
+    60 P = 8192 + A * 40 + B * 128 + C * 1024: REM STARTING ADDRESS IN RAM
+    70 POKE P,YY+N
+    80 N = 128-N: IF N=0 THEN YY=YY+1
+    90 NEXT
+
+![screenshot](apple2_hires_poke_colorsdetail.png)
+
+What this does is plotting increasing values but every other line we add 128 to see the equivalent of the second palette.
