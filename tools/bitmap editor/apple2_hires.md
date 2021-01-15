@@ -4,7 +4,9 @@
 * [Structure of the hires screen in RAM](#structure-of-the-hires-screen-in-ram)
 * [Summary table of addresses in RAM](#summary-table-of-addresses-in-ram)
 * [Taking advantage of the hires structure](#taking-advantage-of-the-hires-structure)
-	* [Use case #1](#use-case-1)
+	* [Use case #1: displaying tiles](#use-case-1-displaying-tiles)
+	* [Use case #2](#use-case-1)
+	* [Use case #3](#use-case-1)
 
 
 ## Introduction
@@ -208,12 +210,12 @@ This structure might seem confusing and it's true that most of the time programm
 
 Nonetheless, even such an interlaced structure could be used without resorting systematically to lookup tables, depending on the use case.
 
-### Use case #1
+### Use case #1: displaying tiles
 For example, if we're on a line that's a multiple of 8 (that's the first 3 columns in the table above), all we have to do to find the address of the next 8 lines is to add 4 to the most significant byte (MSB) of the address. In 6502 that's only one instruction (after you've cleared the carry), which might be cycle-saving. In Applesoft it means adding 1024 to the base address.
 
 For instance, if we draw bitmaps starting from a line that is a multiple of 8, like it might be the case when displaying 8-lines high tiles in a game , we only need the address of the first line, while the address of the other lines have the same LSB but an MSB that is incremented by four each time.
 
-### Use case #2
+### Use case #2: clearing the screen
 Another example is when you write a fast routine to clear the hires screen. You'll want to skip the hires holes for two reasons:
 1. It's 512 bytes that don't need to be cleared and that will waste cycles
 2. You may want to use these 512 bytes to store data and so you don't want to erase it
@@ -222,7 +224,7 @@ The position of the screen holes is also very regular. First they are all within
 
 We make use of this information by looping down from `#$F7` (thus skipping the second kind of hole area) to `#$00` but skipping to `#$77` once we reach `#$7F`.
 
-### Use case #3
+### Use case #3: side-scrolling
 If you closely watch the above table, you'll notice that the last A-zone starting addresses all end with either `$xx50` or `$xxD0`. It means that if you want to address this zone, all you have to do is cycle from `#$20` to `#$3F` for the MSB and flip between `#$50` and `#$D0` for the LSB, for instance by using an `EOR #$80`. 
 
 This could be used for instance in a game where the screen scrolls only on the lower third of the screen. You know, in airplanes fighting games, this is usually where the ground and the enemies are (hint, hint).
