@@ -3,6 +3,8 @@
 * [Introduction](#introduction)
 * [Structure of the hires screen in RAM](#structure-of-the-hires-screen-in-ram)
 * [Summary table of addresses in RAM](#summary-table-of-addresses-in-ram)
+* [Taking advantage of the hires structure](#taking-advantage-of-the-hires-structure)
+	* [Use case #1](#use-case-1)
 
 
 ## Introduction
@@ -165,7 +167,7 @@ The starting address of a line Y in hires page 1 is found using the following fo
     P = 8192 + A * 40 + B * 128 + C * 1024: REM STARTING ADDRESS IN RAM
 
 ## Summary table of addresses in RAM
-Here are all the addresses for hires page 1
+Here are all the addresses for hires page 1. Simply add `#$40` to all MSB for page 2.
 
 |<sub>Line</sub>|<sub> Start  </sub>|<sub> End </sub>|<sub> Line </sub>|<sub> Start  </sub>|<sub> End </sub>|<sub> Line </sub>|<sub> Start  </sub>|<sub> End </sub>|<sub> Line </sub>|<sub> Start  </sub>|<sub> End </sub>|<sub>Line </sub>|<sub> Start  </sub>|<sub> End </sub>|<sub> Line </sub>|<sub> Start  </sub>|<sub> End </sub>|<sub>Line </sub>|<sub> Start  </sub>|<sub> End </sub>|<sub> Line </sub>|<sub> Start  </sub>|<sub> End </sub>|
 |--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|
