@@ -7,7 +7,7 @@
 	* [Use case #1: displaying tiles](#use-case-1-displaying-tiles)
 	* [Use case #2: clearing the screen](#use-case-2-clearing-the-screen)
 	* [Use case #3: side-scrolling](#use-case-3-side-scrolling)
-* [Apple ]\[ hires colors: some possibilities, lots of limitations](apple-hires-colors-some-possibilities-lots-of-limitations]
+* [Apple \]\[ hires colors: some possibilities, lots of limitations](apple-hires-colors-some-possibilities-lots-of-limitations]
 
 
 ## Introduction
