@@ -144,6 +144,7 @@ The starting address of a line Y in hires page 1 is found using the following fo
     C = INT(Y - 64 * A - 8 * B): REM C-ZONE
     P = 8192 + A * 40 + B * 128 + C * 1024: REM STARTING ADDRESS IN RAM
 
+## Summary table of addresses in RAM
 Here are all the addresses for hires page 1
 
 |<sub>Line</sub>|<sub> Start  </sub>|<sub> End </sub>|<sub> Line </sub>|<sub> Start  </sub>|<sub> End </sub>|<sub> Line </sub>|<sub> Start  </sub>|<sub> End </sub>|<sub> Line </sub>|<sub> Start  </sub>|<sub> End </sub>|<sub>Line </sub>|<sub> Start  </sub>|<sub> End </sub>|<sub> Line </sub>|<sub> Start  </sub>|<sub> End </sub>|<sub>Line </sub>|<sub> Start  </sub>|<sub> End </sub>|<sub> Line </sub>|<sub> Start  </sub>|<sub> End </sub>|
@@ -185,10 +186,12 @@ This structure might seem confusing and it's true that most of the time programm
 
 Nonetheless, even such an interlaced structure could be used without resorting systematically to lookup tables, depending on the use case.
 
+### Use case #1
 For example, if we're on a line that's a multiple of 8 (that's the first 3 columns in the table above), all we have to do to find the address of the next 8 lines is to add 4 to the most significant byte (MSB) of the address. In 6502 that's only one instruction (after you've cleared the carry), which might be cycle-saving. In Applesoft it means adding 1024 to the base address.
 
 For instance, if we draw bitmaps starting from a line that is a multiple of 8, like it might be the case when displaying 8-lines high tiles in a game , we only need the address of the first line, while the address of the other lines have the same LSB but an MSB that is incremented by four each time.
 
+### Use case #2
 Another example is when you write a fast routine to clear the hires screen. You'll want to skip the hires holes for two reasons:
 1. It's 512 bytes that don't need to be cleared and that will waste cycles
 2. You may want to use these 512 bytes to store data and so you don't want to erase it
@@ -197,6 +200,7 @@ The position of the screen holes is also very regular. First they are all within
 
 We make use of this information by looping down from `#$F7` (thus skipping the second kind of hole area) to `#$00` but skipping to `#$77` once we reach `#$7F`.
 
+### Use case #3
 If you closely watch the above table, you'll notice that the last A-zone starting addresses all end with either `$xx50` or `$xxD0`. It means that if you want to address this zone, all you have to do is cycle from `#$20` to `#$3F` for the MSB and flip between `#$50` and `#$D0` for the LSB, for instance by using an `EOR #$80`. 
 
 This could be used for instance in a game where the screen scrolls only on the lower third of the screen. You know, in airplanes fighting games, this is usually where the ground and the enemies are (hint, hint).
@@ -244,7 +248,7 @@ For instance this code would copy bytes 1-39 of each line of the 32 last lines o
 	BCC .loopx			; not yet
 	
 ```
-## Apple ]\[ hires colors
+## Apple ]\[ hires colors: some possibilities, lots of limitations
 So far we've been filling the screen with blocks of 7 pixels. How comes one byte, which is 8 bits, is only 7 pixels on the screen ?
 
 To understand this, the best way is to go back to basics and to BASIC !
@@ -271,6 +275,7 @@ The results are very informative. Let's zoom in a bit.
 The first line of pixels is black, corresponding to 0.
 `POKE`ing 1 in the next line produced a violet dot in x=0, while `POKE`ing 2 resulted in a green dot in x=1 and finally, POKEing 3 created two white dots, one in position 0 and the other in position 1.
 
+### Hires rules part 1: first limitations
 From these 4 `POKE`, we can already see that 
 #### 1. Plotting is inverted compared to the order of the representation of a binary value.
 
@@ -304,11 +309,13 @@ This might be summarised as the following:
 * if the pixel is off, it's rendered black except if both its neighbours are on, in which case it's rendered using the color of its neighbours' columns
 * if the pixel is on, it's rendered white except if both its neighbours are off, in which cas it's rendered using the color of his own column.
 
+### Hires rules part 2: more limitations
 And we can continue our observations:
 #### 6. It's impossible to plot more than one pair of consecutive colored pixels: colored pixels are always odd in number
 #### 7. To plot only two consecutive colored pixels, they must be surrounded by two white pixels on one side and two black pixels on the other side
 #### 8. Single dot (then colored) pixels must be surrounded by two pairs of black pixels but the minimum distance between two single dot pixels of the same color is 3 black pixels. The minimum distance between two single dot pixels of different colors is 2 pixels.
 
+### Hires rules part 3: more colors and more limitations
 Now what about values above 128 ?
 Let's edit line 20 of the previous program
 
@@ -320,6 +327,8 @@ Yes ! New colors !
 So, the 7th bit switches to a different color palette. Pixels in this palette follow the same rules as the previous palette. But we can add more observations.
 #### 9. A second palette is selected when the 7th bit (AKA the "hi-bit") is ON
 #### 10. Blue is on even columns and orange/red is on odd columns ... HEY WAIT !! LOOK CLOSELY !
+
+### Hires rules part 4: do we have 560 pixels horizontally ?
 #### 11. Blue pixels are displayed in-between the columns of the violet/green pixels while red pixels are displayed in-between the columns of the green/violet pixels.
 
 How weird is that ?
@@ -361,9 +370,10 @@ What we did was plot one dot with the first palette, go down one line, plot a do
 Let's zoom in
 ![screenshot](img/apple2_hires_hplot560detail.png)
 
-This is why sometimes you can read that the Apple ][ has a hires resolution of 560x192 (and I'm not talking about double hi-res which is an entirely different topic !). It's possible to plot "between" columns of the other palette making it look like the resolution is 560 pixels wide. But practically, this is not useable because on one byte you may activate only one palette (using the 7th bit). So it can be used mostly only if you're turn on only one bit in the 7-pixels byte. Since you need at least 2 black pixels between single dot pixels and that you can't use the "in-between" columns until 7 pixels further, the illusion of 560 pixels horizontally will quickly vanish.
+This is why sometimes you can read that the Apple ]\[ has a hires resolution of 560x192 (and I'm not talking about double hi-res which is an entirely different topic !). It's possible to plot "between" columns of the other palette making it look like the resolution is 560 pixels wide. But practically, this is not useable because on one byte you may activate only one palette (using the 7th bit). So it can be used mostly only if you're turn on only one bit in the 7-pixels byte. Since you need at least 2 black pixels between single dot pixels and that you can't use the "in-between" columns until 7 pixels further, the illusion of 560 pixels horizontally will quickly vanish.
 
 Is the Apple ]\[ hires screen 280 pixels wide ? Yes, if you consider a monochrome display, it is. If you're counting on colors, it's more like a 140 pixels wide screen since you need two pixels to render white. And as we've seen there are a lot of limitations on the use of colors.
 
 Let's speak of two others ... yes, the nightmare is far from finished !
 
+### Hires rules part 5: last but not least
