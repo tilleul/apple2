@@ -377,3 +377,5 @@ Is the Apple ]\[ hires screen 280 pixels wide ? Yes, if you consider a monochrom
 Let's speak of two others ... yes, the nightmare is far from finished !
 
 ### Hires rules part 5: last but not least
+Even and odd bytes have their color bits swapped. Preshifting bitmaps
+Consecutive bytes with hi-bit set/unset will cause color problems.
