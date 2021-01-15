@@ -335,6 +335,6 @@ Let's try this:
     80 N = 128-N: IF N=0 THEN YY=YY+1
     90 NEXT
 
-![screenshot](apple2_hires_poke_colorsdetail.png)
+![screenshot](img/apple2_hires_poke_colorsdetail.png)
 
 What this does is plotting increasing values but every other line we add 128 to see the equivalent of the second palette.
