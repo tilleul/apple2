@@ -338,3 +338,32 @@ Let's try this:
 ![screenshot](img/apple2_hires_poke_colorsdetail.png)
 
 What this does is plotting increasing values but every other line we add 128 to see the equivalent of the second palette.
+
+As you can see, not only are the color pixels of the other palette slightly shifted but the whites and blacks too !
+
+Ok, let's try something else using HPLOT and HCOLOR this time ..
+
+    NEW
+    10 HGR
+    20 X=0: C = 3
+    30 FOR Y = 0 TO 159
+    40 HCOLOR = C
+    50 HPLOT X,Y
+    60 C=10-C
+    70 IF C = 3 THEN X=X+1
+    90 NEXT
+
+![screenshot](img/apple2_hires_hplot560.png)
+What a beautiful colored line ... looks so sharp !
+
+What we did was plot one dot with the first palette, go down one line, plot a dot with the second palette in the same X-coord, go down one line, plot a dot in the next X-coord with the first palette, and so on.
+
+Let's zoom in
+![screenshot](img/apple2_hires_hplot560detail.png)
+
+This is why sometimes you can read that the Apple ][ has a hires resolution of 560x192 (and I'm not talking about double hi-res which is an entirely different topic !). It's possible to plot "between" columns of the other palette making it look like the resolution is 560 pixels wide. But practically, this is not useable because on one byte you may activate only one palette (using the 7th bit). So it can be used mostly only if you're turn on only one bit in the 7-pixels byte. Since you need at least 2 black pixels between single dot pixels and that you can't use the "in-between" columns until 7 pixels further, the illusion of 560 pixels horizontally will quickly vanish.
+
+Is the Apple ]\[ hires screen 280 pixels wide ? Yes, if you consider a monochrome display, it is. If you're counting on colors, it's more like a 140 pixels wide screen since you need two pixels to render white. And as we've seen there are a lot of limitations on the use of colors.
+
+Let's speak of two others ... yes, the nightmare is far from finished !
+
