@@ -34,4 +34,5 @@ If we slightly modify the above code to POKE the first 3 lines in memory, we hav
     80 PRINT A
 
 The result is this
+
 ![screenshot](img/apple2_hires_lines0-64-128.png)
