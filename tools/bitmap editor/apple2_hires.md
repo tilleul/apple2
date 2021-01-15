@@ -206,39 +206,40 @@ The same is in fact true the other two A-zones. For the first one, addresses end
 Now imagine you want scroll only the last 32 lines of the screen, then the MSB of the baseline will be either `#$22` or `#$23` to which you add 4 for each of the next seven lines while the LSB flips between `#$50` and `#$D0`. And you have many options to unroll the loops if you want to speed things up a little bit further
 
 For instance this code would copy bytes 1-39 of each line of the 32 last lines of the screen to bytes 0-38 effectively scrolling that part of the screen one byte to the left.
+(note: this is just one way, I'm not saying it's better than any other)
 
-                LDA #$22			; base address MSB
-                CLC                         ; we're going to ADC !
-			
-                LDX #38			; 39 times per line
-	loop                                    ; 4 lines at a time
-	.ldy1	    LDY $2251,X			; copy byte X on 1st line
-	.sty1       STY $2250,X			; to previous byte
-	.ldy2       LDY $22D1,X			; same for 2nd line
-	.sty2       STY $22D0,X
-	.ldy3       LDY $2351,X			; 3rd line
-	.sty3       STY $2350,X
-	.ldy4       LDY $23D1,X			; 4th line
-	.sty4       STY $23D0,X
-                DEX
-                BPL loop			; stop when X goes back to #$FF
-			
-                ADC #4                      ; the next 4 lines base addr
-                CMP #$40			; have we done them all ?
-                BCS .rts
-
-                STA ldy1+2			; self modifying code
-                STA sty1+2			; MSB for first 2 lines
-                STA ldy2+2
-                STA sty2+2
-                ADC #1                      ; add one more for the
-                STA ldy3+2			; MSB of the last 2 lines
-                STA sty3+2
-                STA ldy4+2
-                STA sty4+2
-			
-	.rts	    RTS
-
-			
-
-
+```
+	LDA #$22			; base address MSB
+            
+.loopx  SEC				; set carry
+	STA .ldy1+2			; self modifying code
+	STA .sty1+2			; MSB for first 2 lines
+	STA .ldy2+2
+	STA .sty2+2
+	ADC #0				; 0+carry = 1 !
+	STA .ldy3+2			; MSB of the last 2 lines
+	STA .sty3+2			; add one more for the
+	STA .ldy4+2
+	STA .sty4+2
+	TAY				; save in Y for now
+            
+		
+	LDX #0				; init byte counter
+.loop					; 4 lines at a time
+.ldy1	LDA $2251,X			; copy byte X on 1st line
+.sty1	STA $2250,X			; to previous byte
+.ldy2	LDA $22D1,X			; same for 2nd line
+.sty2	STA $22D0,X
+.ldy3	LDA $2351,X			; 3rd line
+.sty3	STA $2350,X
+.ldy4	LDA $23D1,X			; 4th line
+.sty4	STA $23D0,X
+	INX				; next byte
+	CPX #$27			; last byte ?
+	BCC .loop			; not yet
+	TYA				; carry is set ! get back MSB
+	ADC #2				; 2+carry = 3 !
+	CMP #$40			; have we done them all ?
+	BCC .loopx			; not yet
+	
+```
