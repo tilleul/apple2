@@ -1,4 +1,22 @@
-# Apple ]\[ hires
+# Apple ]\[ hires: I know a little something I want to share with you
+## Summary
+[Introduction](#introduction)
+
+
+## Introduction
+A lot has been said and written on the Apple ]\[ hires screens. How colors work, how it's organized in RAM, how to animate sprites, how to clear the screen faster than the HGR/HGR2 Applesoft commands, how to draw faster lines than HPLOT, etc.
+
+This article does not have the pretention to uncover anything new regarding hires pages: if you know how to program your Apple ]\[ then most of the information here will be old news to you. Nonetheless there might be a trick or two that I learned the hard way that still might be useful to you. 
+
+I've written this as if you didn't know much about hires on Apple ]\[ except maybe a few Applesoft commands like `HGR/HGR2`, `HCOLOR` and `HPLOT`. Maybe even `DRAW/XDRAW` ... and yet you don't know how it works behind all this.
+
+So this article will first cover the basics: structure of the hires pages in RAM, pixels and colors (even in those sections you might find some rare info) and then will dive into specific techniques and tools I've encountered or developed.
+
+I'll try to make you understand how it works by using Applesoft most of the time, so I expect you know mostly how to program in Applesoft. I won't explain the Applesoft code much except using some `REM`s in the code. 
+
+Some parts of this article will feature 6502 code. If you're not comfortable with 6502, don't worry, just skip the section.
+
+
 ## Structure of the hires screen in RAM
 The Apple ]\[ has 2 hires pages. One in $2000-$3FFF. The second one in $4000-$5FFF. Each page is thus 8192 bytes long.
 
