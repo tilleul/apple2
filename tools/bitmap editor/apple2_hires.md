@@ -203,10 +203,11 @@ This could be used for instance in a game where the screen scrolls only on the l
 
 The same is in fact true the other two A-zones. For the first one, addresses end with either `$00` or `$80`. For the second one, it's `$28` and `$A8`. But maybe the use cases are less obvious ?
 
-Now imagine you want scroll only the last 32 lines of the screen, then the MSB of the baseline will be either `#$22` or `#$23` to which you add 4 for each of the next seven lines while the LSB flips between `#$50` and `#$D0`. And you have many options to unroll the loops if you want to speed things up a little bit further
+Now imagine you want scroll only the last 32 lines of the screen, then the MSB of the baseline will be either `#$22` or `#$23` to which you add 4 for each of the next seven lines while the LSB flips between `#$50` and `#$D0`. And you have many options to unroll the loops if you want to speed things up a little bit further.
 
 For instance this code would copy bytes 1-39 of each line of the 32 last lines of the screen to bytes 0-38 effectively scrolling that part of the screen one byte to the left.
-(note: this is just one way, I'm not saying it's better than any other)
+
+(Note: this is just one way, I'm not saying it's better than any other)
 
 ```
 	LDA #$22			; base address MSB
@@ -243,3 +244,62 @@ For instance this code would copy bytes 1-39 of each line of the 32 last lines o
 	BCC .loopx			; not yet
 	
 ```
+## Apple ]\[ hires colors
+So far we've been filling the screen with blocks of 7 pixels. How comes one byte, which is 8 bits, is only 7 pixels on the screen ?
+
+To understand this, the best way is to go back to basics and to BASIC !
+
+Let's try this (don't forget to type `NEW` beforehand)
+
+    10 HGR
+    20 FOR Y = 0 TO 127
+    30 A = INT(Y/64): REM A-ZONE
+    40 B = INT( (Y - 64 * A) / 8): REM B-ZONE
+    50 C = INT(Y - 64 * A - 8 * B): REM C-ZONE
+    60 P = 8192 + A * 40 + B * 128 + C * 1024: REM STARTING ADDRESS IN RAM
+    70 POKE P,Y
+    80 NEXT
+Here's the output:
+
+![screenshot](img/apple2_hires_poke0-128.png)
+
+What we've done is POKE values 0-127 into the first bytes of the first 128 lines of the hires screen.
+
+The results are very informative. Let's zoom in a bit.
+![screenshot](img/apple2_hires_poke0-128detail.png)
+
+The first line of pixels is black, corresponding to 0.
+POKEing 1 in the next line produced a violet dot in x=0, while POKEing 2 resulted in a green dot in x=1 and finally, POKEing 3 created two white dots, one in position 0 and the other in position 1.
+
+From these 4 POKE, we can already see that 
+#### 1. Plotting is inverted compared to the order of the representation of a binary value.
+
+| dec | binary | result |
+|-|-|-
+|0|000|black-black-black|
+|1|001|violet-black-black|
+|2|010|black-green-black|
+|3|011|white-white-black|
+
+#### 2. Violet pixels are on even columns while green pixels are on odd columns. 
+#### 3. White pixels are always grouped by 2 or more pixels
+#### 4. Except on the edges of the screen, the same is true for black pixels
+#### 5. A black pixel surrounded by two others will be rendered using the color of one of the two other pixels, but NEVER white
+
+To understand what color a pixel is going to be rendered, one must consider the pixel on both sides of the considered pixel.
+
+|even|odd|even|pixel n is
+|-|-|-|-|
+|**pixel n-1**|**pixel n**|**pixel n+1**|**rendered as**|
+|off|off|off|black|
+|off|off|on|black|
+|on|off|off|black
+|on|off|on|color of even column|
+|off|on|off|color of odd column|
+|off|on|on|white
+|on|on|off|white
+|on|on|on|white|
+
+This might be summarised as the following:
+* if the pixel is off, it's rendered black except if both its neighbours are on, in which case it's rendered using the color of its neighbours' columns
+* if the pixel is on, it's rendered white except if both its neighbours are off, in which cas it's rendered using the color of his own column
