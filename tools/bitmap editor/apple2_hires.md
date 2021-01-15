@@ -2,6 +2,7 @@
 ## Summary
 * [Introduction](#introduction)
 * [Structure of the hires screen in RAM](#structure-of-the-hires-screen-in-ram)
+* [Summary table of addresses in RAM](#summary-table-of-addresses-in-ram)
 
 
 ## Introduction
@@ -21,7 +22,7 @@ Some parts of this article will feature 6502 code. If you're not comfortable wit
 ## Structure of the hires screen in RAM
 The Apple ]\[ has 2 hires pages. One in $2000-$3FFF. The second one in $4000-$5FFF. Each page is thus 8192 bytes long.
 
-The dimensions of one hires page is 40 bytes wide and 192 lines high. 40x192 = 7680 bytes. 512 bytes are "missing" and in fact not used/displayed.
+The dimensions of one hires page are 40 bytes wide and 192 lines high. 40x192 = 7680 bytes. 512 bytes are "missing" and in fact not used/displayed.
 
 The hires screen is divided in 3 zones of 64 lines. Let's call it zones A.
 Each section is then divided in 8 sub-sections of 8 lines. Let's call these zones B.
