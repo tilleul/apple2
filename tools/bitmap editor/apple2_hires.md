@@ -5,8 +5,8 @@
 * [Summary table of addresses in RAM](#summary-table-of-addresses-in-ram)
 * [Taking advantage of the hires structure](#taking-advantage-of-the-hires-structure)
 	* [Use case #1: displaying tiles](#use-case-1-displaying-tiles)
-	* [Use case #2](#use-case-1)
-	* [Use case #3](#use-case-1)
+	* [Use case #2: clearing the screen](#use-case-2-clearing-the-screen)
+	* [Use case #3: side-scrolling](#use-case-3-side-scrolling)
 
 
 ## Introduction
