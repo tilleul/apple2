@@ -7,11 +7,11 @@
 	* [Use case #1: displaying tiles](#use-case-1-displaying-tiles)
 	* [Use case #2: clearing the screen](#use-case-2-clearing-the-screen)
 	* [Use case #3: side-scrolling](#use-case-3-side-scrolling)
-* [Hires colors: some possibilities, lots of limitations](#apple-hires-colors-some-possibilities-lots-of-limitations]
+* [Hires colors: some possibilities, lots of limitations](#apple-hires-colors-some-possibilities-lots-of-limitations)
 	* [Hires rules part 1: first limitations](#hires-rules-part-1-first-limitations)
 	* [Hires rules part 2: more limitations](#hires-rules-part-2-more-limitations)
 	* [Hires rules part 3: more colors but more limitations](#hires-rules-part-3-more-colors-but-more-limitations)
-	* [Hires rules part 4: is that 560 pixels horizontally ?](#hires-rules-part-4-is-that-560-pixels-horizontally)
+	* [Hires rules part 4: is that 560 pixels horizontally ?](#hires-rules-part-4-is-that-560-pixels-horizontally-)
 
 
 ## Introduction
