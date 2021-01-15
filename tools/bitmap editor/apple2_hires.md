@@ -7,7 +7,11 @@
 	* [Use case #1: displaying tiles](#use-case-1-displaying-tiles)
 	* [Use case #2: clearing the screen](#use-case-2-clearing-the-screen)
 	* [Use case #3: side-scrolling](#use-case-3-side-scrolling)
-* [Apple \]\[ hires colors: some possibilities, lots of limitations](apple-hires-colors-some-possibilities-lots-of-limitations]
+* [Hires colors: some possibilities, lots of limitations](#apple-hires-colors-some-possibilities-lots-of-limitations]
+	* [Hires rules part 1: first limitations](#hires-rules-part-1-first-limitations)
+	* [Hires rules part 2: more limitations](#hires-rules-part-2-more-limitations)
+	* [Hires rules part 3: more colors but more limitations](#hires-rules-part-3-more-colors-but-more-limitations)
+	* [Hires rules part 4: is that 560 pixels horizontally ?](#hires-rules-part-4-is-that-560-pixels-horizontally)
 
 
 ## Introduction
@@ -273,7 +277,7 @@ For instance this code would copy bytes 1-39 of each line of the 32 last lines o
 	BCC .loopx			; not yet
 	
 ```
-## Apple ]\[ hires colors: some possibilities, lots of limitations
+## Hires colors: some possibilities, lots of limitations
 So far we've been filling the screen with blocks of 7 pixels. How comes one byte, which is 8 bits, is only 7 pixels on the screen ?
 
 To understand this, the best way is to go back to basics and to BASIC !
@@ -340,7 +344,7 @@ And we can continue our observations:
 #### 7. To plot only two consecutive colored pixels, they must be surrounded by two white pixels on one side and two black pixels on the other side
 #### 8. Single dot (then colored) pixels must be surrounded by two pairs of black pixels but the minimum distance between two single dot pixels of the same color is 3 black pixels. The minimum distance between two single dot pixels of different colors is 2 pixels.
 
-### Hires rules part 3: more colors and more limitations
+### Hires rules part 3: more colors but more limitations
 Now what about values above 128 ?
 Let's edit line 20 of the previous program
 
@@ -353,7 +357,7 @@ So, the 7th bit switches to a different color palette. Pixels in this palette fo
 #### 9. A second palette is selected when the 7th bit (AKA the "hi-bit") is ON
 #### 10. Blue is on even columns and orange/red is on odd columns ... HEY WAIT !! LOOK CLOSELY !
 
-### Hires rules part 4: do we have 560 pixels horizontally ?
+### Hires rules part 4: is that 560 pixels horizontally ?
 #### 11. Blue pixels are displayed in-between the columns of the violet/green pixels while red pixels are displayed in-between the columns of the green/violet pixels.
 
 How weird is that ?
