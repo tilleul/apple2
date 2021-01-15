@@ -4,7 +4,9 @@ The Apple ]\[ has 2 hires pages. One in $2000-$3FFF. The second one in $4000-$5F
 
 The dimensions of one hires page is 40 bytes wide and 192 lines high. 40x192 = 7680 bytes. 512 bytes are "missing" and in fact not used/displayed.
 
-The hires screen is divided in 3 sections of 64 lines. Each section is then divided in 8 sub-sections of 8 lines, each itself divided in 8 sub-sub-sections representing the lines themselves.
+The hires screen is divided in 3 zones of 64 lines. Let's call it zones A.
+Each section is then divided in 8 sub-sections of 8 lines. Let's call these zones B.
+Every B zone is itself divided in 8 sub-sub-sections representing the lines themselves. These are zones C.
 
 To better understand this division, it's easier to POKE bytes into RAM and see what happens.
 
@@ -17,28 +19,26 @@ So to draw the entire line 0 we could `RUN` this code
 
 ![screenshot](img/apple2_hires_line0.png)
 
-8192 + 40 = 8232 ($2028) is the next byte in memory. But
+8192 + 40 = 8232 ($2028) is the next byte in memory. But`POKE 8232,255` will not plot 7 pixels on line 1 but on line 64 !
 
-    POKE 8232,255
-
-will not plot 7 pixels on line 1 but on line 64 !
 If we slightly modify the above code to POKE the first 3 lines as stored in memory, we have
 
     10 HGR
-    20 A = 8192: REM $2000
-    30 FOR J = 0 TO 2
-    40 FOR I = 0 TO 39
-    50 POKE A, 255
-    60 A = A + 1
-    70 NEXT I,J
-    80 PRINT A
+    20 P = 8192: REM $2000
+    30 FOR A = 0 TO 2: REM 3 A-ZONES
+    40 FOR I = 0 TO 39: REM 40 BYTES PER LINE
+    50 POKE P, 255
+    60 P = P + 1
+    70 NEXT I,A
+    80 PRINT P
 
 The result is this
 
 ![screenshot](img/apple2_hires_lines0-64-128.png)
 
-We have drawn line 0, line 64 and line 128 !
-Now the next address to `POKE` seems to be 8312 ($2078 in hex -- the resulting value in our variable `A`).
+We have drawn line 0, line 64 and line 128 ! These 3 lines represent the first line of each A-zone.
+
+Now the next address to `POKE` seems to be 8312 ($2078 in hex -- the resulting value in our variable `P`).
 
 But if we do `POKE 8312, 255` we don't see any change on the screen ! This is because we have reached one the hires screen holes !
 
@@ -48,42 +48,42 @@ Now that we now that, we could slightly modify the above code so that after havi
 
 
     10 HGR
-    20 A = 8192: REM $2000
-    30 FOR K = 0 TO 2
-    40 FOR J = 0 TO 2
-    50 FOR I = 0 TO 39
-    60 POKE A, 255
-    70 A = A + 1
-    80 NEXT I,J
-    90 A = A + 8
-    100 NEXT K
-    110 PRINT A
+    20 P = 8192: REM $2000
+    30 FOR B = 0 TO 2: REM FOR NOW JUST DRAW INTO 3 B-ZONES
+    40 FOR A = 0 TO 2: REM 3 A-ZONES
+    50 FOR I = 0 TO 39: REM 40 BYTES PER LINE
+    60 POKE P, 255
+    70 P = P + 1
+    80 NEXT I,A
+    90 P = P + 8
+    100 NEXT B
+    110 PRINT P
 
 We end up with
 
 ![screenshot](img/apple2_hires_lines_triplets.png)
 
 As you watch how the lines are filled, you better understand the hires screen structure: 
-* the first 3 lines of 40 bytes delimit the three 64-lines sections and represent lines 0, 64 and 128 of the screen which are line 0 of each of the sections
+* the first 3 lines of 40 bytes delimit the three A-zones and represent lines 0, 64 and 128 of the screen. Incidentally, these are too the first B-zones of each A-zone.
 * then 8 bytes are wasted
-* the next 3 lines of 40 bytes represent line 8 of each of the 64 lines section (that is the base line of each section + 8, so we have lines 0+8, 64+8 and 128+8)
+* the next 3 lines of 40 bytes represent line 8 of each of the A-zones and the 2nd B-zone of each A-zone (that is the base line of each A-zone + 8, so we have lines 0+8, 64+8 and 128+8)
 * then 8 bytes are wasted
-* the next 3 lines of 40 bytes represent line 16 of each of the 64 lines section
-* the 8 bytes are wasted
-* This continues until we've arrived at line 56 relative to each section. That is line 56, line 64+56=120 and line 128+56=184.
+* the next 3 lines of 40 bytes represent line 16 of each of the A-zones and the 3rd B-zone in each A-zone
+* then 8 bytes are wasted
+* This continues until we've arrived at line 56 relative to each A-zone, which is also the 8th B-zone for each A-zone. That is line 0+56=56, line 64+56=120 and line 128+56=184.
 
 The following code will do it
 
     10 HGR
-    20 A = 8192: REM $2000
-    30 FOR K = 0 TO 7
-    40 FOR J = 0 TO 2
-    50 FOR I = 0 TO 39
-    60 POKE A, 255
-    70 A = A + 1
-    80 NEXT I,J
-    90 A = A + 8
-    100 NEXT K
+    20 P = 8192: REM $2000
+    30 FOR B = 0 TO 7: REM 8 B-ZONES IN EACH A-ZONE
+    40 FOR A = 0 TO 2: REM 3 A-ZONES
+    50 FOR I = 0 TO 39: REM 40 BYTES PER LINE
+    60 POKE P, 255
+    70 P = P + 1
+    80 NEXT I,A
+    90 P = P + 8
+    100 NEXT B
     110 PRINT A
 
 ![screenshot](img/apple2_hires_lines_8.png)
@@ -91,59 +91,60 @@ The following code will do it
 So what happens next ? Well, a `POKE 9216,255` will show you that you're plotting on line 1 ! And once line 1 has been filled, you'll plot on line 65 ! And then on line 129 ! Then back to first section of 64-lines but on line 8+1=9, then on line 16+1=17, etc.
 
     10 HGR
-    20 A = 8192: REM $2000
-    30 FOR L = 0 TO 7
-    40 FOR K = 0 TO 7
-    50 FOR J = 0 TO 2
-    60 FOR I = 0 TO 39
-    70 POKE A, 255
-    80 A = A + 1
-    90 NEXT I,J
-    100 A = A + 8
-    110 NEXT K,L
-    120 PRINT A
+    20 P = 8192: REM $2000
+    30 FOR C = 0 TO 7: REM 8 C-ZONES IN EACH B-ZONE
+    40 FOR B = 0 TO 7: REM 8 B-ZONES IN EACH A-ZONE
+    50 FOR A = 0 TO 2: REM 3 A-ZONES
+    60 FOR I = 0 TO 39: REM 40 BYTES PER LINE
+    70 POKE P, 255
+    80 P = P + 1
+    90 NEXT I,A
+    100 P = P + 8
+    110 NEXT B,C
+    120 PRINT P
 
 If you run the above code, your screen will be filled and A will point to 16384 (or $4000) which is the start of page 2.
 
-To sum it up, the logical structure in RAM is as follows:
+To sum it up, the logical structure of the line numbers in RAM is as follows:
 
- 1. There are 3 sections of 64 lines beginning at lines 0, 64 and 128
- 2. A Y-line subindex is set to zero
- 3. A Y-line index is set to zero
- 4. Section number is set to zero
- 5. RAM holds the three lines corresponding to the section + index + subindex
- 6. Section number is incremented by 64
- 7. Back to step 5, three times
+ 1. There are 3 sections of 64 lines beginning at lines 0, 64 and 128. The baseline of the A-zones.
+ 2. The baseline for the C-zones is set to zero
+ 3. The baseline for the B-zones is set to zero
+ 4. The baseline for the A-zone is set to zero
+ 5. RAM holds the line = (A-zone baseline) + (B-zone baseline) + (C-zone baseline)
+ 6. Baseline for the A-zone is incremented by 64
+ 7. Back to step 5, two more times
  8. Then 8 bytes are wasted
- 9. Y-Line index is incremented by 8
- 10. Back to step 4, eight times
- 11. Y-line SUBindex is incremented by 1
- 12. Back to step 3, eight times
+ 9. B-zone baseline is incremented by 8
+ 10. Back to step 4, seven more times
+ 11. C-zone baseline is incremented by 1
+ 12. Back to step 3, seven more times
 
 In code that would be
 
-    10 HGR: A = 8192
-    20 Y0 = 0 : N0 = 0 : REM Y-SUBINDEX AND COUNTER
-    30 Y1 = 0 : N1 = 0 : REM Y-INDEX AND COUNTER
-    40 S = 0 : NS = 0 : REM SECTION NUMBER AND COUNTER
-    50 HPLOT 0, S + Y0 + Y1 TO 279, S + Y0 + Y1: REM DRAW A WHOLE LINE
-    60 PRINT S + Y0 + Y1;": ";A" ";: S = S + 64: A = A + 40
-    70 NS = NS + 1 : IF NS < 3 THEN GOTO 50
-    80 A = A + 8: REM HERE 8 BYTES ARE NOT USED
-    90 Y1 = Y1 + 8
-    100 N1 = N1 + 1: IF N1<8 THEN GOTO 40
-    110 Y0 = Y0 + 1
-    120 N0 = N0 + 1: IF N0<8 THEN GOTO 30: REM WE COULD HAVE USED Y0 ONLY SINCE IT'S ALWAYS EQUAL TO N0
+    10 HGR: P = 8192
+    20 C = 0 : NC = 0 : REM C-ZONE BASELINE AND COUNTER
+    30 B = 0 : NB = 0 : REM B-ZONE BASELINE AND COUNTER
+    40 A = 0 : NA = 0 : REM A-ZONE BASELINE AND COUNTER
+    50 HPLOT 0, A + B + C TO 279, A + B + C: REM DRAW A WHOLE LINE
+    60 PRINT A + B + C;": ";P" ";: A = A + 64: P = P + 40: REM INCREMENT A-ZONE BASELINE AND POINTER P
+    70 NA = NA + 1 : IF NA < 3 THEN GOTO 50: REM THERE ARE 3 A-ZONES
+    80 P = P + 8: REM HERE 8 BYTES ARE NOT USED
+    90 B = B + 8: REM INCREMENT B-ZONE BASELINE
+    100 NB = NB + 1: IF NB<8 THEN GOTO 40: REM 8 B-ZONES PER A-ZONE
+    110 C = C + 1
+    120 NC = NC + 1: IF NC<8 THEN GOTO 30: REM 8 C-ZONES PER B-ZONE
 
 Notice how the HPLOTs draw the lines in the same order as the `POKE`s in the previous programs.
 
 The starting address of a line Y in hires page 1 is found using the following formula:
 
-    S = INT(Y/64)
-    Y1 = INT( (Y - 64 * S) / 8)
-    Y0 = INT(Y - 64 * S - 8 * Y1)
-    A = 8192 + S * 40 + Y1 * 128 + Y0 * 1024
+    A = INT(Y/64): REM A-ZONE
+    B = INT( (Y - 64 * A) / 8): REM B-ZONE
+    C = INT(Y - 64 * A - 8 * B): REM C-ZONE
+    P = 8192 + A * 40 + B * 128 + C * 1024: REM STARTING ADDRESS IN RAM
 
+Here are all the addresses for hires page 1
 
 |<sub>Line</sub>|<sub> Start  </sub>|<sub> End </sub>|<sub> Line </sub>|<sub> Start  </sub>|<sub> End </sub>|<sub> Line </sub>|<sub> Start  </sub>|<sub> End </sub>|<sub> Line </sub>|<sub> Start  </sub>|<sub> End </sub>|<sub>Line </sub>|<sub> Start  </sub>|<sub> End </sub>|<sub> Line </sub>|<sub> Start  </sub>|<sub> End </sub>|<sub>Line </sub>|<sub> Start  </sub>|<sub> End </sub>|<sub> Line </sub>|<sub> Start  </sub>|<sub> End </sub>|
 |--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|
@@ -179,13 +180,14 @@ The starting address of a line Y in hires page 1 is found using the following fo
 | <sub>**120**</sub> | <sub>$23A8</sub> | <sub>$23CF</sub> | <sub>**121**</sub> | <sub>$27A8</sub> | <sub>$27CF</sub> | <sub>**122**</sub> | <sub>$2BA8</sub> | <sub>$2BCF</sub> | <sub>**123**</sub> | <sub>$2FA8</sub> | <sub>$2FCF</sub> | <sub>**124**</sub> | <sub>$33A8</sub> | <sub>$33CF</sub> | <sub>**125**</sub> | <sub>$37A8</sub> | <sub>$37CF</sub> | <sub>**126**</sub> | <sub>$3BA8</sub> | <sub>$3BCF</sub> | <sub>**127**</sub> | <sub>$3FA8</sub> | <sub>$3FCF</sub> |
 | <sub>**184**</sub> | <sub>$23D0</sub> | <sub>$23F7</sub> | <sub>**185**</sub> | <sub>$27D0</sub> | <sub>$27F7</sub> | <sub>**186**</sub> | <sub>$2BD0</sub> | <sub>$2BF7</sub> | <sub>**187**</sub> | <sub>$2FD0</sub> | <sub>$2FF7</sub> | <sub>**188**</sub> | <sub>$33D0</sub> | <sub>$33F7</sub> | <sub>**189**</sub> | <sub>$37D0</sub> | <sub>$37F7</sub> | <sub>**190**</sub> | <sub>$3BD0</sub> | <sub>$3BF7</sub> | <sub>**191**</sub> | <sub>$3FD0</sub> | <sub>$3FF7</sub> |
 
+## Taking advantage of the hires structure
 This structure might seem confusing and it's true that most of the time programmers will use lookup tables to find the starting address of a line instead of using the above formula.
 
-Nonetheless, even such an interlaced structure could be used without resorting to lookup tables, depending on the use case.
+Nonetheless, even such an interlaced structure could be used without resorting systematically to lookup tables, depending on the use case.
 
-For example, if we're on a line that's a multiple of 8 (that's the first 3 columns in the table above), all we have to do to find the address of the 8 next lines is to add 1 to the most significant byte (MSB) of the address.
+For example, if we're on a line that's a multiple of 8 (that's the first 3 columns in the table above), all we have to do to find the address of the next 8 lines is to add 4 to the most significant byte (MSB) of the address. In 6502 that's only one instruction (after you've cleared the carry), which might be cycle-saving. In Applesoft it means adding 1024 to the base address.
 
-For instance, if we draw bitmaps starting from a line that is a multiple of 8, like it might be the case when displaying tiles in a game, we only need the address of the first line, while the address of the other lines have the same LSB but an MSB that is incremented by one each time.
+For instance, if we draw bitmaps starting from a line that is a multiple of 8, like it might be the case when displaying 8-lines high tiles in a game , we only need the address of the first line, while the address of the other lines have the same LSB but an MSB that is incremented by four each time.
 
 Another example is when you write a fast routine to clear the hires screen. You'll want to skip the hires holes for two reasons:
 1. It's 512 bytes that don't need to be cleared and that will waste cycles
@@ -194,3 +196,49 @@ Another example is when you write a fast routine to clear the hires screen. You'
 The position of the screen holes is also very regular. First they are all within the third section of the screen. Then their address range is either `$xx78-$xx7F` or `$xxF8-$xxFF`.
 
 We make use of this information by looping down from `#$F7` (thus skipping the second kind of hole area) to `#$00` but skipping to `#$77` once we reach `#$7F`.
+
+If you closely watch the above table, you'll notice that the last A-zone starting addresses all end with either `$xx50` or `$xxD0`. It means that if you want to address this zone, all you have to do is cycle from `#$20` to `#$3F` for the MSB and flip between `#$50` and `#$D0` for the LSB, for instance by using an `EOR #$80`. 
+
+This could be used for instance in a game where the screen scrolls only on the lower third of the screen. You know, in airplanes fighting games, this is usually where the ground and the enemies are (hint, hint).
+
+The same is in fact true the other two A-zones. For the first one, addresses end with either `$00` or `$80`. For the second one, it's `$28` and `$A8`. But maybe the use cases are less obvious ?
+
+Now imagine you want scroll only the last 32 lines of the screen, then the MSB of the baseline will be either `#$22` or `#$23` to which you add 4 for each of the next seven lines while the LSB flips between `#$50` and `#$D0`. And you have many options to unroll the loops if you want to speed things up a little bit further
+
+For instance this code would copy bytes 1-39 of each line of the 32 last lines of the screen to bytes 0-38 effectively scrolling that part of the screen one byte to the left.
+
+                LDA #$22			; base address MSB
+                CLC                         ; we're going to ADC !
+			
+                LDX #38			; 39 times per line
+	loop                                    ; 4 lines at a time
+	.ldy1	    LDY $2251,X			; copy byte X on 1st line
+	.sty1       STY $2250,X			; to previous byte
+	.ldy2       LDY $22D1,X			; same for 2nd line
+	.sty2       STY $22D0,X
+	.ldy3       LDY $2351,X			; 3rd line
+	.sty3       STY $2350,X
+	.ldy4       LDY $23D1,X			; 4th line
+	.sty4       STY $23D0,X
+                DEX
+                BPL loop			; stop when X goes back to #$FF
+			
+                ADC #4                      ; the next 4 lines base addr
+                CMP #$40			; have we done them all ?
+                BCS .rts
+
+                STA ldy1+2			; self modifying code
+                STA sty1+2			; MSB for first 2 lines
+                STA ldy2+2
+                STA sty2+2
+                ADC #1                      ; add one more for the
+                STA ldy3+2			; MSB of the last 2 lines
+                STA sty3+2
+                STA ldy4+2
+                STA sty4+2
+			
+	.rts	    RTS
+
+			
+
+
