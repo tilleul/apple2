@@ -1,7 +1,7 @@
 # Apple ]\[ hires: I know a little something I want to share with you
 ## Summary
 * [Introduction](#introduction)
-* [Structure of the hires screen in RAM](structure-of-the-hires-screen-in-ram)
+* [Structure of the hires screen in RAM](#structure-of-the-hires-screen-in-ram)
 
 
 ## Introduction
