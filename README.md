@@ -14,7 +14,7 @@ Only time will tell.
 (this section will feature 6502 code, games and tips'n'tricks
 
 ## Tools
-* [Bitmap Editor](https://github.com/tilleul/apple2/tree/master/2liners/bitmap%20editor): An Excel spreadsheet to virtually create and render Apple ]\[ sprites/bitmaps.
+* [Bitmap Editor](https://github.com/tilleul/apple2/tree/master/tools/bitmap%20editor): An Excel spreadsheet to virtually create and render Apple ]\[ sprites/bitmaps.
 
 ---
 #### License
