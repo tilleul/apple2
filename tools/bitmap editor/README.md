@@ -16,3 +16,7 @@ The spreadsheet
 * generates `POKE` commands to type in Applesoft so you can see how it renders in your favourite Apple ]\[ emulator.
 
 Instructions are included in the spreadsheet.
+
+LICENCE
+You may freely use, copy (etc) this spreadsheet for your own creations and you may also redistribute it on any kind of media as long as the "instructions" sheet is included and not modified.
+If you mention this file or distribute it elsewhere, please send me a message. I'm on Facebook's "Apple II Software Enthusiasts" and "Apple II Enthusiasts" groups, among others.
