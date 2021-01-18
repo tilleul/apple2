@@ -1,7 +1,7 @@
 # Bitmap Creator for Apple ]\[ hires sprites/bitmaps
 ![title](img/bitmap_creator_example.png)
 
-<img src="img/bitmap_creator_preshifted.png" align=right>
+<img src="img/bitmap_creator_preshifted.png" align=right></img>
 An [Excel Spreadsheet](https://github.com/tilleul/apple2/tree/master/tools/bitmap%20editor/src) to virtually create and render Apple ]\[ bitmaps/sprites. 
 
 Works with MS Excel, Libre Office/Open Office Calc.
