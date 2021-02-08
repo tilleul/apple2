@@ -1,4 +1,4 @@
-# 6502 SpASM (6502 Spreadsheet Assembler) v1.1.1
+# 6502 SpASM (6502 Spreadsheet Assembler) v1.1.2
 ![!test](6502_assembler.png)
 
 This is a proof-of-concept 6502 assembler in a spreadsheet (works with Excel, Libre Office, etc.)
@@ -42,6 +42,10 @@ The XLSX file is the latest release. Instructions included in the spreadsheet.
 - column D is now colored as comments, it's meant to be used as full-line comments
 - new official name "SpASM" !
 
+### v1.1.2 (Feb 8, 2021)
+- fixed instructions because columns were shifted with latest release
+- added syntax highlighting for SUBs
+- deleted Excel external link
 
 ## Licence
 You may freely use, copy (etc) this spreadsheet for your own creations and you may also redistribute it on any kind of media as long as the "instructions" sheet is included and not modified.
