@@ -1,7 +1,8 @@
-# 6502 SpASM (6502 Spreadsheet Assembler) v1.1.2
+# 6502 SpASM (6502 Spreadsheet Assembler and Linker) v1.2.0
 ![!test](6502_assembler.png)
 
-This is a proof-of-concept 6502 assembler in a spreadsheet (works with Excel, Libre Office, etc.)
+This is a ~~proof-of-concept~~ full-featyres 6502 assembler with linker in a spreadsheet (works with Excel, Libre Office, etc.).
+If you're using Libre Office, you need Libre Office v7.1.x or later if you want to use the linker.
 
 The XLSX file is the latest release. Instructions included in the spreadsheet.
 
@@ -21,6 +22,11 @@ The XLSX file is the latest release. Instructions included in the spreadsheet.
 - HEX pseudo-instruction to define HEX data
 - ASC/STR pseudo-instructions to define text constants (with ASC, hi-bit is unset, while with STR, it is)
 - syntax highlighting
+- linking of object modules (sheets) in the same workbook
+- global labels across the workbook
+- negative values are supported for decimal notation
+- error checking (highlighted in brown)
+
 
 ## Revisions
 ### v1.0 (Jan 31, 2021)
@@ -46,6 +52,18 @@ The XLSX file is the latest release. Instructions included in the spreadsheet.
 - fixed instructions because columns were shifted with latest release
 - added syntax highlighting for SUBs
 - deleted Excel external link
+
+### v1.2.0 (Feb 15, 2021)
+- added linker
+- linker requires Libre Office v7.1.x or above (or MS Excel)
+- added globals labels page
+- removed more external links
+- little fixes here and there
+- removed Wagner's code samples
+- can reference ASCII values with ' or "
+- errors highlighting
+- added numerous examples in instructions_code sheet (used as a test sheet)
+
 
 ## Licence
 You may freely use, copy (etc) this spreadsheet for your own creations and you may also redistribute it on any kind of media as long as the "instructions" sheet is included and not modified.
