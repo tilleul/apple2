@@ -1,7 +1,7 @@
 # 6502 SpASM (6502 Spreadsheet Assembler and Linker) v1.2.0
 ![!test](6502_assembler.png)
 
-This is a ~~proof-of-concept~~ full-featyres 6502 assembler with linker in a spreadsheet (works with Excel, Libre Office, etc.).
+This is a ~~proof-of-concept~~ full-featured 6502 assembler with linker in a spreadsheet (works with Excel, Libre Office, etc.).
 If you're using Libre Office, you need Libre Office v7.1.x or later if you want to use the linker.
 
 The XLSX file is the latest release. Instructions included in the spreadsheet.
