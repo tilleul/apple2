@@ -10,7 +10,8 @@ The 6502_SpASM-v.x.y.xlsx file is the latest release. Instructions included in t
 The 6502_SpASM-v.x.y-example.xlsx file contains an example with different modules linked. Possibly in an older version.
 
 
-## Features- all the 6502 instructions plus a couple of pseudo-instructions
+## Features
+- all the 6502 instructions plus a couple of pseudo-instructions
 - all addressing modes
 - global and local labels
 - EQUs to declare constants
