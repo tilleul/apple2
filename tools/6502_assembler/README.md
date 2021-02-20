@@ -1,5 +1,5 @@
 # 6502 SpASM (6502 Spreadsheet Assembler and Linker) v1.2.2
-![!test](6502_assembler.png)
+![!test](6502_assembler2.png)
 
 This is a ~~proof-of-concept~~ full-featured 6502 assembler with linker in a spreadsheet (works with Excel, Libre Office, etc.).
 
