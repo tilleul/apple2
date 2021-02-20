@@ -1,4 +1,4 @@
-# 6502 SpASM (6502 Spreadsheet Assembler and Linker) v1.2.1
+# 6502 SpASM (6502 Spreadsheet Assembler and Linker) v1.2.2
 ![!test](6502_assembler.png)
 
 This is a ~~proof-of-concept~~ full-featured 6502 assembler with linker in a spreadsheet (works with Excel, Libre Office, etc.).
@@ -37,6 +37,10 @@ The 6502_SpASM-v.x.y-example.xlsx file contains an example with different module
 
 
 ## Revisions
+### v1.2.2 (Feb 20, 2021)
+- fixed some bugs that invited themselves in v1.2.x, most notably two LDX/LDY addressing and globals that were not working anymore
+- fixed some highlighting and cleaned the conditional formatting rules
+
 ### v1.2.1 (Feb 18, 2021)
 - now supports commented code lines 
 - added ADI/DCI
