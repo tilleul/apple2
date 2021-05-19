@@ -161,3 +161,6 @@ It will fill the screen with one kind of character, using four `SPC` statements 
 <img src="spc6.png">
 
 # HAPPY CODING !
+
+<hr/>
+&copy; 2021 François Vander Linden
