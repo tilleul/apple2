@@ -35,7 +35,8 @@ As you can see, something is messed up !
 To understand what's happening here, you need to know how characters are printed on screen by Applesoft.
 
 The Applesoft general routine to print characters on screen is in `$DB5C` and is named `OUTDO`.
-Here's the routine, taken from [S-C documentor website](http://www.txbobsc.com/scsc/scdocumentor/)
+
+Here's the routine, taken from [S-C documentor website](http://www.txbobsc.com/scsc/scdocumentor/).
 
                    1950 *      PRINT CHAR FROM (A)
                    1960 *
