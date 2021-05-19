@@ -12,7 +12,9 @@ Here's a technique that will allow you to repeat any character, even in `FLASH` 
 
 ## Discovery
 Let's see something weird ...
-At the Applesoft prompt, type `FLASH`.
+
+<img src="spc1.png" align="left" width=200px>At the Applesoft prompt, type `FLASH`.
+
 Then `PRINT SPC(10)`. You should now see 10 flashing space characters.
 Now, press `CTRL-BREAK`. This exits the "flash" mode (do no type `NORMAL` !!).
 Type `PRINT SPC(10)` again. And ...
