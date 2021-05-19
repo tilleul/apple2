@@ -24,6 +24,10 @@ WOW ! WHAT IS THAT ??
 What are those inverted single quote characters doing here ? "Something" has replaced space characters with those inverted single quotes ...
 
 <img src="spc2.png" align="left" width=200px>If you have a loaded Applesoft program, I encourage you to `LIST` it. If not, quickly type a short one and see the results ...
+<br/>
+<br clear="both"/>
+
+<img src="spc7.png" align="left" width=200px>And finally if you type an invalid command, the usual `SYNTAX ERROR ?` message will be a little different than usual...
 
 As you can see, something is messed up !
 
