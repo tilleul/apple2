@@ -16,7 +16,7 @@ Let's see something weird ...
 <img src="spc1.png" align="left" width=200px>At the Applesoft prompt, type `FLASH`.
 
 Then `PRINT SPC(10)`. You should now see 10 flashing space characters.
-Now, press `CTRL-BREAK`. This exits the "flash" mode (do no type `NORMAL` !!).
+Now, press `CTRL-RESET`. This exits the "flash" mode (do no type `NORMAL` !!).
 Type `PRINT SPC(10)` again. And ...
 
 WOW ! WHAT IS THAT ??
@@ -55,16 +55,16 @@ The routine is called with the accumulator containing the character to print eve
 
 The routine that will effectively print the character on screen is `COUT` (in `$FDED`here named `MON.COUT`) but this routine here is the pre-treatment of the character to print.
 
-As you can see, before calling `MON.COUT`, an `ORA` with zero-page memory `$F3` is executed. This `ORA` is needed to display characters in flash mode. The problem is that `$F3`, even after a `CTRL-BREAK` is not reset and still contains `$40` (decimal 64), meaning that Applesoft is still (partially -- see below why) in flash mode.
+As you can see, before calling `MON.COUT`, an `ORA` with zero-page memory `$F3` is executed. This `ORA` is needed to display characters in flash mode. The problem is that `$F3`, even after a `CTRL-RESET` is not reset and still contains `$40` (decimal 64), meaning that Applesoft is still (partially -- see below why) in flash mode.
 
 But if it's in flash mode, how comes it prints NORMAL single quotes and not flashing characters ? Because `$F3` is just a mask and is not enough to flash the characters on screen. Another mask, in zero-page `$32` is also used, but this time by the `MON.COUT` routine. In fact `$32`is usually considered to be the memory that indicates if we are in normal (value `$FF`, decimal `255`), flash (value `$7F`, decimal `127`) or inverse (value `$3F`, decimal `63`) modes. But for the flash mode, the mask in `$F3` is equally primordial. In fact, even in normal and inverse modes, the value in `$F3 `has an impact since the `ORA` is called whatever the display mode is.
 
-So, before any character is displayed on screen by Applesoft, two masking operation occur on the ASCII value of the character.
+So, before any character is displayed on screen by Applesoft, two masking operations occur on the ASCII value of the character.
 
  1. an `ORA` with the value in `$F3`
  2. an `AND` with the value in `$32`
 
-`CTRL-BREAK` reset the value in `$32` to `255` ("normal" display mode) but it does not touch the value in `$F3`. That's why we have these display glitches if we `CTRL-BREAK` after `FLASH`. Clearly, it's a bug.
+`CTRL-RESET` resets the value in `$32` to `255` ("normal" display mode) but it does not touch the value in `$F3`. That's why we have these display glitches if we `CTRL-RESET` after `FLASH`. Clearly, it's a bug.
 
 ## Taking advantage of what we know
 Of course Applesoft expects and uses some specific values in `$F3` and `$32`.
@@ -102,7 +102,7 @@ Remember that what happens behind the hood is that the space character (`$20`) i
 
 <img src="spc4.png" align="left" width=200px>In fact it will not work with ASCII characters from 64 to 95, those are the uppercase letters, the `@` sign, the square brackets `][`, the backslash `\` ,  the caret `^` and the underscore `_` .
 
-But all is not lost since we also have an AND mask to apply ! For now, we assumed its value was `$FF` (`255`), meaning it has no effect. But what if ...
+But all is not lost since we also have an `AND` mask to apply ! For now, we assumed its value was `$FF` (`255`), meaning it has no effect. But what if ...
 
 `$20 ORA $41` ("A" uppercase character) equals `$61` but if we do `$61 AND $DF` (thus clearing bit 5), we have `$41` back !
 
