@@ -34,7 +34,7 @@ As you can see, something is messed up !
 ## Explanation
 To understand what's happening here, you need to know how characters are printed on screen by Applesoft.
 
-The general routine to print characters on screen is in `$DB5C`.
+The Applesoft general routine to print characters on screen is in `$DB5C` and is named `OUTDO`.
 Here's the routine, taken from [S-C documentor website](http://www.txbobsc.com/scsc/scdocumentor/)
 
                    1950 *      PRINT CHAR FROM (A)
@@ -57,7 +57,7 @@ Here's the routine, taken from [S-C documentor website](http://www.txbobsc.com/s
 
 The routine is called with the accumulator containing the character to print every time Applesoft needs to print something (like when using `PRINT` or `INPUT` or ... `SPC` !)
 
-The routine that will effectively print the character on screen is `COUT` (in `$FDED`here named `MON.COUT`) but this routine here is the pre-treatment of the character to print.
+The routine that will effectively print the character on screen is `COUT` (in `$FDED`here named `MON.COUT`) but the `OUTDO` routine here is the pre-treatment of the character to print.
 
 As you can see, before calling `MON.COUT`, an `ORA` with zero-page memory `$F3` is executed. This `ORA` is needed to display characters in flash mode. The problem is that `$F3`, even after a `CTRL-RESET` is not reset and still contains `$40` (decimal 64), meaning that Applesoft is still (partially -- see below why) in flash mode.
 
