@@ -55,9 +55,9 @@ The routine is called with the accumulator containing the character to print eve
 
 The routine that will effectively print the character on screen is `COUT` (in `$FDED`here named `MON.COUT`) but this routine here is the pre-treatment of the character to print.
 
-As you can see, before calling `MON.COUT`, an `ORA` with zero-page memory `$F3` is executed. This `ORA` is needed to display characters in flash mode. The problem is that `$F3`, even after a `CTRL-BREAK` is not reset and still contains `#$40` (decimal 64), meaning that Applesoft is still (partially -- see below why) in flash mode.
+As you can see, before calling `MON.COUT`, an `ORA` with zero-page memory `$F3` is executed. This `ORA` is needed to display characters in flash mode. The problem is that `$F3`, even after a `CTRL-BREAK` is not reset and still contains `$40` (decimal 64), meaning that Applesoft is still (partially -- see below why) in flash mode.
 
-But if it's in flash mode, how comes it prints NORMAL single quotes and not flashing characters ? Because `$F3` is just a mask and is not enough to flash the characters on screen. Another mask, in zero-page `$32` is also used, but this time by the `MON.COUT` routine. In fact `$32`is usually considered to be the memory that indicates if we are in normal (value `#$FF`, decimal `255`), flash (value `#$7F`, decimal `127`) or inverse (value `#$3F`, decimal `63`) modes. But for the flash mode, the mask in `$F3` is equally primordial. In fact, even in normal and inverse modes, the value in `$F3 `has an impact since the `ORA` is called whatever the display mode is.
+But if it's in flash mode, how comes it prints NORMAL single quotes and not flashing characters ? Because `$F3` is just a mask and is not enough to flash the characters on screen. Another mask, in zero-page `$32` is also used, but this time by the `MON.COUT` routine. In fact `$32`is usually considered to be the memory that indicates if we are in normal (value `$FF`, decimal `255`), flash (value `$7F`, decimal `127`) or inverse (value `$3F`, decimal `63`) modes. But for the flash mode, the mask in `$F3` is equally primordial. In fact, even in normal and inverse modes, the value in `$F3 `has an impact since the `ORA` is called whatever the display mode is.
 
 So, before any character is displayed on screen by Applesoft, two masking operation occur on the ASCII value of the character.
 
@@ -66,11 +66,26 @@ So, before any character is displayed on screen by Applesoft, two masking operat
 
 `CTRL-BREAK` reset the value in `$32` to `255` ("normal" display mode) but it does not touch the value in `$F3`. That's why we have these display glitches if we `CTRL-BREAK` after `FLASH`. Clearly, it's a bug.
 
+## Taking advantage of what we know
 Of course Applesoft expects and uses some specific values in `$F3` and `$32`.
 
 |  | NORMAL  | FLASH | INVERSE |
 |--|--|--|--|
-| **$32** |  255 ($FF)| 127 ($7F) | 63 ($3F) |
-| **$F3** | 0 ($00) | 64 ($40) | 0 ($00)
+| **$32 (50)** |  $FF (255)| $7F (127) | $3F (63) |
+| **$F3 (243)** | $00 (0)| $40 (64) | $00 (0)
 
-Now
+Now, if we play a bit with the values in those two memory locations we will alter the way Applesoft displays characters on screen.
+
+Two well-known (useless but kind of fun) examples are 
+
+ 1. `POKE 243,32` to lowercase everything, notably the `LIST` command. `POKE 243,0` will return to normal display.
+ 2. `POKE 50, 128` to sort-of disable printing. `LIST` and `CATALOG` will appear empty and the `]` prompt will disappear as well.
+
+Notice that `POKE`ing in 243 influences only Applesoft and not the system ! That's because the `ORA $F3` only occurs within an Applesoft 6502 routine !
+
+So ... `SPC()` is an Applesoft display routine. And as such, it will be influenced by both the values in `$32` and `$F3`. Now we just have to tweak those values to get expected results, that is, replace the space character by the character we want.
+
+It turns out it's quite easy to do. You take the ASCII value of the character you want to display instead of the space character and you `POKE` it in `243` (`$F3`). 
+
+For example, the asterisk has an ASCII value of `42`, so we just do `POKE 243,42` and then `PRINT SPC(10)`. After that we restore the original state with `POKE 243,0`.
+
