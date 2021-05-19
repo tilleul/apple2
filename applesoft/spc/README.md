@@ -87,6 +87,27 @@ So ... `SPC()` is an Applesoft display routine. And as such, it will be influenc
 
 It turns out it's quite easy to do. You take the ASCII value of the character you want to display instead of the space character and you `POKE` it in `243` (`$F3`). 
 
-<img src="spc3.png" align="left" width=200px>For example, the asterisk has an ASCII value of `42`, so we just do `POKE 243,42` and then `PRINT SPC(10)`. After that we restore the original state with `POKE 243,0`.
+<img src="spc3.png" align="left" width=200px>For example, the asterisk has an ASCII value of `42` (or `$2A`), so we just do `POKE 243,42` and then `PRINT SPC(10)`. After that we restore the original state with `POKE 243,0`.
+
+Wow that was easy ! We now have a REPEAT instruction in Applesoft !
+Oh yeah ?
+
+Of course, there's a small caveat. 
+
+Remember that what happens behind the hood is that the space character (`$20`) is `ORA`'d with the value in `$F3`. 
+
+ - `$20 ORA $2A `equals `$2A`. So, we're good.
+ - `$20 ORA $61` ("a" lowercase character) equals `$61`. Still good. But ...
+ - `$20 ORA $41` ("A" uppercase character) equals ... `$61` too ! Oh noo !
+
+<img src="spc4.png" align="left" width=200px>In fact it will not work with ASCII characters from 64 to 95, those are the uppercase letters, the `@` sign, the square brackets `][`, the backslash `\` ,  the caret `^` and the underscore `_` .
+
+But all is not lost since we also have an AND mask to apply ! For now, we assumed its value was `$FF` (`255`), meaning it has no effect. But what if ...
+
+`$20 ORA $41` ("A" uppercase character) equals `$61` but if we do `$61 AND $DF` (thus clearing bit 5), we have `$41` back !
+
+So, for ASCII between 64 and 95, we have to change the value in `$32` as well and it has to be `$DF` (`223`).
+
+<img src="spc5.png">
 
 
