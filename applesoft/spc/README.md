@@ -110,4 +110,45 @@ So, for ASCII between 64 and 95, we have to change the value in `$32` as well an
 
 <img src="spc5.png">
 
+(Notice how I immediately typed the `POKE`s to restore the normal display, otherwise my next commands would be partially invisible.)
 
+Now we are able to use `SPC` to repeat any character available !
+
+## One last thing ...
+Ok, it works ... but only in NORMAL mode ! How do we make it work in FLASH and INVERSE ?
+
+It's quite simple. I won't go into details on how it works but we just fiddle with the value in `$32`.
+
+Basically what we do is subtract `128` (`$80`) from the value in `$32` if we want FLASH characters and subtract `192` (`$C0`) if we want INVERSE characters.
+
+It works because bytes in the text screen memory (in `$400`) do not use the ASCII values of the characters. Byte values between 0-63 will display INVERSE characters (no lowercase characters), while values between 64-127 will display FLASH characters (no lowercase characters). Values above 127 are NORMAL characters (upper and lowercase). Now 255-192=63 (INVERSE) and 255-128=127 (FLASH) ... I suppose you got it.
+
+Remember that not all characters are printable in FLASH or INVERSE.
+
+## A little program to sum it all
+This little program will demonstrate what we learned here.
+
+It will fill the screen with one kind of character, using four `SPC` statements with a parameter of 240.
+
+    10 HOME
+    20 X = 255: Y=0: REM INIT VALUES
+    30 POKE 243,0: REM RESET ORA MASK
+    40 POKE 50, X: REM RESET AND MASK
+    50 VTAB 1
+    60 INPUT "ASCII (1-255; 0 EXITS) ? ";Z
+    70 IF NOT Z THEN END
+    80 INPUT "NORMAL/FLASH/INVERSE (N/F/I) ? ";N$
+    90 IF N$ = "F" THEN Y=128
+    100 IF N$ = "I" THEN Y=192
+    110 IF (Z>=64 AND Z<=95) OR (Z>=192 AND Z<=223) THEN X = 223: REM PREPARE END MASK FOR ASCII 64-95 OR 192-223
+    120 POKE 50,X-Y: REM SET NORMAL/FLASH/INVERSE MASK
+    130 POKE 243, Z: REM SET ORA MASK
+    140 VTAB 1
+    150 PRINT SPC(240): REM FILL THE SCREEN !
+    160 PRINT SPC(240)
+    170 PRINT SPC(240)
+    180 PRINT SPC(240)
+    190 GOTO 20
+<img src="spc6.png">
+
+# HAPPY CODING !
