@@ -87,5 +87,6 @@ So ... `SPC()` is an Applesoft display routine. And as such, it will be influenc
 
 It turns out it's quite easy to do. You take the ASCII value of the character you want to display instead of the space character and you `POKE` it in `243` (`$F3`). 
 
-For example, the asterisk has an ASCII value of `42`, so we just do `POKE 243,42` and then `PRINT SPC(10)`. After that we restore the original state with `POKE 243,0`.
+<img src="spc3.png" align="left" width=200px>For example, the asterisk has an ASCII value of `42`, so we just do `POKE 243,42` and then `PRINT SPC(10)`. After that we restore the original state with `POKE 243,0`.
+
 
