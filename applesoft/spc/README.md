@@ -64,7 +64,12 @@ So, before any character is displayed on screen by Applesoft, two masking operat
  1. an `ORA` with the value in `$F3`
  2. an `AND` with the value in `$32`
 
-`CTRL-RESET` resets the value in `$32` to `255` ("normal" display mode) but it does not touch the value in `$F3`. That's why we have these display glitches if we `CTRL-RESET` after `FLASH`. Clearly, it's a bug.
+`CTRL-RESET` resets the value in `$32` to `255` ("normal" display mode) but it does not touch the value in `$F3`. That's why we have these display glitches if we `CTRL-RESET` after `FLASH`. 
+
+Clearly, it's a bug.
+
+When we press `CTRL-RESET` the system does a lot of resets, among them a call to SETNORM (`$FE84`) that restores the `$32` memory to `$FF`. Then a bit later it calls the routine pointed by the reset vector (`$3F2`), that is Applesoft's warm restart in `$E003` which in turns calls the `RESTART` routine in `$D43C`. This routine's main purpose is to display the `]` prompt and wait for the user to type a series of direct commands or a line of code. The only way I see we could fix this bug is by pointing the reset vector in `3F2` to a small routine that would reset `$F3` and then call the `RESTART` routine.
+
 
 ## Taking advantage of what we know
 Of course Applesoft expects and uses some specific values in `$F3` and `$32`.
