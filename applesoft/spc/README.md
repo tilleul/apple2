@@ -27,7 +27,7 @@ What are those inverted single quote characters doing here ? "Something" has rep
 <br/>
 <br clear="both"/>
 
-<img src="spc7.png" align="left" width=200px>And finally if you type an invalid command, the usual `SYNTAX ERROR ?` message will be a little different than usual...
+<img src="spc7.png" align="left" width=200px>And finally if you type an invalid command, the usual `?SYNTAX ERROR` message will be a little different ...
 
 As you can see, something is messed up !
 
