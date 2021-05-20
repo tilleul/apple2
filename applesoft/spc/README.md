@@ -1,4 +1,4 @@
-# Use SPC() to repeat any character !
+# How to use SPC() to repeat any kind of character !
 ## Introduction
 You know how `SPC()` can be used to PRINT a number of space characters. For example `PRINT SPC(10)` will print 10 space characters.
 
