@@ -37,25 +37,25 @@ To understand what's happening here, you need to know how characters are printed
 The Applesoft general routine to print characters on screen is in `$DB5C` and is named `OUTDO`.
 
 Here's the routine, taken from [S-C documentor website](http://www.txbobsc.com/scsc/scdocumentor/).
-
+```assembly
                    1950 *      PRINT CHAR FROM (A)
                    1960 *
                    1970 *      NOTE: POKE 243,32 ($20 IN $F3) WILL CONVERT
                    1980 *      OUTPUT TO LOWER CASE.  THIS CAN BE CANCELLED
                    1990 *      BY NORMAL, INVERSE, OR FLASH OR POKE 243,0.
                    2000 *--------------------------------
-    DB5C- 09 80    2010 OUTDO  ORA #$80     PRINT (A)
-    DB5E- C9 A0    2020        CMP #$A0     CONTROL CHR?
-    DB60- 90 02    2030        BCC .1       SKIP IF SO
-    DB62- 05 F3    2040        ORA FLASH.BIT   =$40 FOR FLASH, ELSE $00
-    DB64- 20 ED FD 2050 .1     JSR MON.COUT "AND"S WITH $3F (INVERSE), $7F (FLASH)
+    DB5C- 09 80    2010 OUTDO  ORA #$80           PRINT (A)
+    DB5E- C9 A0    2020        CMP #$A0           CONTROL CHR?
+    DB60- 90 02    2030        BCC .1             SKIP IF SO
+    DB62- 05 F3    2040        ORA FLASH.BIT      =$40 FOR FLASH, ELSE $00
+    DB64- 20 ED FD 2050 .1     JSR MON.COUT       "AND"S WITH $3F (INVERSE), $7F (FLASH)
     DB67- 29 7F    2060        AND #$7F
     DB69- 48       2070        PHA
-    DB6A- A5 F1    2080        LDA SPEEDZ   COMPLEMENT OF SPEED #
-    DB6C- 20 A8 FC 2090        JSR MON.WAIT   SO SPEED=255 BECOMES (A)=1
+    DB6A- A5 F1    2080        LDA SPEEDZ         COMPLEMENT OF SPEED #
+    DB6C- 20 A8 FC 2090        JSR MON.WAIT       SO SPEED=255 BECOMES (A)=1
     DB6F- 68       2100        PLA
     DB70- 60       2110        RTS
-
+```
 The routine is called with the accumulator containing the character to print every time Applesoft needs to print something (like when using `PRINT` or `INPUT` or ... `SPC` !)
 
 The routine that will effectively print the character on screen is `COUT` (in `$FDED`here named `MON.COUT`) but the `OUTDO` routine here is the pre-treatment of the character to print.
@@ -139,7 +139,7 @@ Remember that not all characters are printable in FLASH or INVERSE.
 This little program will demonstrate what we learned here.
 
 It will fill the screen with one kind of character, using four `SPC` statements with a parameter of 240.
-
+```basic
     10 HOME
     20 X = 255: Y=0: REM INIT VALUES
     30 POKE 243,0: REM RESET ORA MASK
@@ -159,6 +159,7 @@ It will fill the screen with one kind of character, using four `SPC` statements 
     170 PRINT SPC(240)
     180 PRINT SPC(240)
     190 GOTO 20
+``` 
 <img src="spc6.png">
 
 # HAPPY CODING !
