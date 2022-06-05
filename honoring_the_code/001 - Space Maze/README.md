@@ -127,6 +127,7 @@ also we can get rid of line 175 as we'll never reach it.
 And that's it ! the game is now smoothier and more responsive. Obviously it goes faster but despite that it's in fact easier to maneuver the spaceship.
 
 The whole modified code is here: [spacemaze_quickfix2.bas](./spacemaze_quickfix2.bas)
+
 And it can be run from the DSK as "SPACE MAZE QUICK FIX 2"
 
 ## Further optimization
@@ -141,6 +142,7 @@ Without going up until the point where all variables names are one letter only, 
 5) every game cycle, the coordinates of the ship, the fuel left and the hi-score are printed on the screen, and for most of these lines, the programmer used a CALL-868 which clears the line from the cursor to the end of the line. This is inefficient when all you're printing are numeric values. Simply append a space to the numeric value is enough to delete any extra character as those values only increment/decrement by a step of 1. Also the hiscore should be printed once at the start of the game and never again until the next game. 
 6) Lines 15 to 50 should be moved at the end of the program as they are used only once. As a rule for any action game in Applesoft: your main game cycling routine should be at the top of the program as any GOTO/GOSUB will search the line number to reach from the top. This is also why the comments at the top should be moved at the end of the program.
 7) I don't know why but the programmer used a lot of CALL-936 which is exactly the same as the HOME command except it's parsed using a few more cycles. Fortunately these calls are not made during the game but CALL-936 is much less readable than HOME. So there's a double reason not to use it.
+8) I have stored common integer values like 49152 in variables as this speeds the parsing. With such a long integer, Applesoft reads 5 numeric characters and transform their ASCII representation to its own numeric format. By using a variable, Applesoft only parse one character (the variable names) and it points to an address in memory where the value is already formatted and ready for use.
 9) The rest of the modifications I've made are either aesthetic or practical ones: 
  - always try to prompt the user the same way (you either use "Type Y/N" or "Type 'Y' or 'N'" but not both)
  - the star wars music is removed from the intro screen as it's really ... dull nowadays :) but you can still ask the program to play it at the start of the game
