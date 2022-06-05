@@ -89,7 +89,7 @@ You may also load it from the DSK file: [htc1_spacemaze.dsk](./htc1_spacemaze.ds
 
 There's one drawback, however: the game will slow down as your spaceship enters more and more deeply into the maze. This is because we always check if the spaceship is in zone 1, then if not, check if it's in zone 2, then if not, check if it's in zone 3, etc. Once we're in zone 16, it will be like we didn't change anything to the code. We've seen that these tests take time and they should be reduced to a minimum.
 
-So why not use the value of Z to check only what is needed ? Since you're on zone Z, you can only go on zone Z-1 or zone Z+1. So all we have to do is use "ON Z GOSUB" and check for zone Z-1, Z and then Z+1 and if all failed, it means we're out of the maze.
+So why not use the value of Z to check only what is needed ? Since you're on zone Z, you can only go on zone Z-1 or zone Z+1. So all we have to do is use "ON Z GOSUB" and check for zone Z-1, zone Z and then zone Z+1 and if all failed, it means we're out of the maze.
 
 So, let's rewrite line 300 with ON GOSUB
 ```basic
