@@ -17,9 +17,11 @@ Let me present you **SPACE MAZE** !
 
 ## Overview
 
-Here's a link to the DSK file that contains the code (among others): [htc1_spacemaze.dsk](./htc1_spacemaze.dsk)
+Here's a link to the DSK file that contains the original code (and all the other code we're going to create): [htc1_spacemaze.dsk](./htc1_spacemaze.dsk)
 
-And here are two screenshots of the game...
+Simply RUN SPACE MAZE from the DSK ...
+
+Here are two screenshots of the game...
 
 Instructions:
 
@@ -52,7 +54,7 @@ Here's a representation of the 16 rectangle zones the maze is made of.
 
 The main problem is that the code goes through ALL of the coordinates testing for EACH rectangle zone EVERY time, even if it has found already found the zone where the spaceship is. Each of these tests is made of 4 conditions (testing 2 limits of X and then 2 limits of Y). That's 4x16=64 conditions in a row ... and this is killing the game.
 
-16 lines like this one will kill the game: 
+16 consecutive lines like this one will kill the game: 
 ```basic
 100  IF (X >  = 10 AND X <  = 80) AND (Y >  = 80 AND Y <  = 100) THEN Z = 1
 ```
