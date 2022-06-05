@@ -32,7 +32,12 @@ The main problem with the game is that it's not very responsive. You can turn on
 Here's the full original code: [spacemaze.bas](./spacemaze.bas)
 
 The main game routine is in lines 100-300.
-Lines 100-175 will detect if the spaceship is out of the maze corridors
-Lines 210-300 will manage the spaceship movement (reading the joystick), plotting/unplotting the spaceship dot and also print the fuel level and spaceship coordinates
+
+Lines 100-175 will detect if the spaceship is out of the maze corridors. It's a serie of IF/THEN checking if the spaceship is within the maze boundaries.
+
+Lines 210-300 will manage the spaceship movement (reading the joystick), plotting/unplotting the spaceship dot and also print the fuel level and spaceship coordinates.
 
 How does the program check if the spaceship has hit a wall ? My intuition was that maybe the program used the "collision counter" in $EA (234) but this only works with Hires Shape Tables (you know DRAW/XDRAW routines to draw 2D vector shapes in hires). What it does is more simple: as the maze is hardcoded, the code checks if the spaceship is within one of the maze rectangles sections. This is what lines 100-162 do. They check every rectangle and set a variable Z that contains the rectangle number where the spaceship is (among 16 rectangles).
+
+Here's a representation of the 16 rectangle zones the maze is made of.
+![rectangle zones](./htc3.png)
