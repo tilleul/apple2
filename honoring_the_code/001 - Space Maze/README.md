@@ -3,6 +3,9 @@ Space Maze by Micro-Sparc, as published in Nibble Magazine #1, Jan-Feb 1980.
 
 ## Summary
 * [Overview](#overview)
+* [How the code works](#how-the-code-works)
+* [Fixing the game](#fixing-the-game)
+* [Further optimization](#further-optimization)
 
 For this first episode I've chosen the very first issue of Nibble magazine, dating back to Jan-Feb 1980 ! Were you one of the lucky one to own a copy of this issue back then ? Well, I wasn't. At the time, I was only 5 and I'm not even sure we had an Apple II at home then. And also, Nibble was a US magazine that came to Europe (I'm from Belgium) mostly through their Nibble Express compendiums.
 
