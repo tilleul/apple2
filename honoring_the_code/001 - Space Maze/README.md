@@ -146,6 +146,9 @@ Without going up until the point where all variables names are one letter only, 
  - pressing enter when giving choices will default to appropriate values (at least for me) highlighted by INVERSE characters.
  - I've added keyboard support, for now the game is easier in that mode than with the joystick but maybe we can alter that a bit in a future version ?
 
-All in all, here's the full modified code: [spacemaze_htc_v1.bas](./spacemaze_htc_v1.bas)
+All in all, here's the full modified code: [spacemaze_htc_v1.bas](./spacemaze_htc_v1.bas) 
 
 You can run it from the DSK as "SPACE MAZE HTC V1"
+
+It certainly can be optimized a little bit more but unless you change the fundamentals of the game (either the game itself or the inner workings) you won't see much difference with any further optimization.
+
