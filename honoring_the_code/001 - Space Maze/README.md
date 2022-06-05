@@ -2,11 +2,13 @@
 Space Maze by Micro-Sparc, as published in Nibble Magazine #1, Jan-Feb 1980.
 
 ## Summary
+* [Introduction](#introduction)
 * [Overview](#overview)
 * [How the code works](#how-the-code-works)
 * [Fixing the game](#fixing-the-game)
 * [Further optimization](#further-optimization)
 
+## Introduction
 For this first episode I've chosen the very first issue of Nibble magazine, dating back to Jan-Feb 1980 ! Were you one of the lucky one to own a copy of this issue back then ? Well, I wasn't. At the time, I was only 5 and I'm not even sure we had an Apple II at home then. And also, Nibble was a US magazine that came to Europe (I'm from Belgium) mostly through their Nibble Express compendiums.
 
 Although I did not have this issue, for a reason or another, the program we'll be talking about came to me through a disk(ette) of various basic programs. I remember vividly the graphics and the Star Wars music. Unfortunately, as we will see, the game is terrible. It's terrible today but it was also terrible back then.
@@ -131,14 +133,19 @@ This was the main modification that needed to be done in order to "fix" the game
 Without going up until the point where all variables names are one letter only, we can optimize some stuff.
 
 1) we can replace the ON GOSUB with an ON GOTO and replace all the RETURNs we've just typed with GOTO 210 as this is what will happen anyway when we return. It means we gain some cycles as the memory address of the next statement does not have to be saved on the stack.
-2) the sound routine uses to memory addresses to indicate the pitch and the duration of the note being played. The pitch is stored in 780 ($30C), while the duration is in 781 ($30D). The pitch is not modified by the sound routine while the duration is decreased by the sound routine. So when it's time to utter the spaceship beep, we only need to reset back the duration and thus not bother with the pitch (removing one POKE).
+2) the sound routine uses two memory addresses to indicate the pitch and the duration of the note being played. The pitch is stored in 780 ($30C), while the duration is in 781 ($30D). The pitch is not modified by the sound routine while the duration is decreased by the sound routine. So when it's time to utter the spaceship beep, we only need to reset back the duration and thus not bother with the pitch (removing one POKE).
 3) to test for difficulty, the program checks the value of the HD$ variable which holds either "H" (hard) or "E" (easy). It's more efficient to check for a number. So we need to replace this check with a numeric variable.
-4) same thing for the spaceship sound, instead of checking for a string variable we should check for a numeric variable.
-5) every game cycle, the coordinates of the ship, the fuel left and the hi-score are printed on the screen, and for most of these lines, the programmer used a CALL-868 which clears the line from the cursor to the end of the line. This is inefficient when all you're printing are numeric values. Simply append a space to the numeric value is enough to delete any extra character as those values only increment/decrement by a step of 1. Also the hiscore should be printed once at the start of the game and never again until the next game.
+4) same thing for the spaceship sound, instead of checking for a string variable to see if we must emit a beep, we should check for a numeric variable.
+5) every game cycle, the coordinates of the ship, the fuel left and the hi-score are printed on the screen, and for most of these lines, the programmer used a CALL-868 which clears the line from the cursor to the end of the line. This is inefficient when all you're printing are numeric values. Simply append a space to the numeric value is enough to delete any extra character as those values only increment/decrement by a step of 1. Also the hiscore should be printed once at the start of the game and never again until the next game. 
 6) Lines 15 to 50 should be moved at the end of the program as they are used only once. As a rule for any action game in Applesoft: your main game cycling routine should be at the top of the program as any GOTO/GOSUB will search the line number to reach from the top. This is also why the comments at the top should be moved at the end of the program.
 7) I don't know why but the programmer used a lot of CALL-936 which is exactly the same as the HOME command except it's parsed using a few more cycles. Fortunately these calls are not made during the game but CALL-936 is much less readable than HOME. So there's a double reason not to use it.
 9) The rest of the modifications I've made are either aesthetic or practical ones: 
-- always try to prompt the user the same way (you either use "Type Y/N" or "Type 'Y' or 'N'" but not both)
-- the star wars music is removed from the intro screen as it's really ... dull nowadays :)
-- pressing enter when giving choices will default to appropriate values (at least for me) highlighted by INVERSE characters.
-- I've added keyboard support, for now the game is easier in that mode than with the joystick but ...
+ - always try to prompt the user the same way (you either use "Type Y/N" or "Type 'Y' or 'N'" but not both)
+ - the star wars music is removed from the intro screen as it's really ... dull nowadays :) but you can still ask the program to play it at the start of the game
+ - I've modified some sounds here and there
+ - pressing enter when giving choices will default to appropriate values (at least for me) highlighted by INVERSE characters.
+ - I've added keyboard support, for now the game is easier in that mode than with the joystick but maybe we can alter that a bit in a future version ?
+
+All in all, here's the full modified code: [spacemaze_htc_v1.bas](./spacemaze_htc_v1.bas)
+
+You can run it from the DSK as "SPACE MAZE HTC V1"
