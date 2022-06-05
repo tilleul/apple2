@@ -17,7 +17,7 @@ Let me present you **SPACE MAZE** !
 
 ## Overview
 
-Here's a link to the DSK file that contains the original code (and all the other code we're going to create): [htc1_spacemaze.dsk](./htc1_spacemaze.dsk)
+Here's a link to the DSK file that contains the original code (and all the other code we're going to create): [htc1_spacemaze.dsk](./files/htc1_spacemaze.dsk)
 
 Simply RUN SPACE MAZE from the DSK ...
 
@@ -25,21 +25,21 @@ Here are two screenshots of the game...
 
 Instructions:
 
-![instructions](./htc1.png)
+![instructions](./files/htc1.png)
 
 Starting screen:
 
-![starting screen](./htc2.png)
+![starting screen](./files/htc2.png)
 
 The objective of the game is to move your spaceship (represented by a dot) to the end of the maze as fast as possible without crashing in the walls of the maze.
-Using the Apple II (analaog) joystick, you carefully give your spaceship direction and speed and try to go as far as possible. You also have to make sure you don't go out of fuel: even when you're not moving your fuel runs fast, so you have to hurry.
+Using the Apple II (analog) joystick, you carefully give your spaceship direction and speed and try to go as far as possible. You also have to make sure you don't go out of fuel: even when you're not moving your fuel runs fast, so you have to hurry.
 
 In itself the game concept is simple and it's not very original even for the time but the idea that this game is Applesoft only (and really short in fact) is appealing. Unfortunately the joystick control is very hard to master and even in "Easy" mode (there's a "Hard" mode where your ship is sometimes pulled in a random direction) it's nearly impossible to beat. And once you beat the game, you're forced to play in Hard mode and the only thing you can do is try to break your hiscore (which means reach the end of the maze in a shorter time).
 
 The main problem with the game is that it's not very responsive. You can turn on sound and your ship will emit a beep every time it has moved from one point to another and by hearing the beat of the beep you know that the code is too slow to offer responsive controls.
 
 ## How the code works
-Here's the full original code: [spacemaze.bas](./spacemaze.bas)
+Here's the full original code: [spacemaze.bas](./files/spacemaze.bas)
 
 The main game routine is in lines 100-300.
 
@@ -50,7 +50,7 @@ Lines 210-300 will manage the spaceship movement (reading the joystick), plottin
 How does the program check if the spaceship has hit a wall ? My intuition was that maybe the program used the "collision counter" in $EA (234) but this only works with Hires Shape Tables (you know DRAW/XDRAW routines to draw 2D vector shapes in hires). What it does is more simple: as the maze is hardcoded, the code checks if the spaceship is within one of the maze rectangles sections. This is what lines 100-162 do. They check every rectangle and set a variable Z that contains the rectangle number where the spaceship is (among 16 rectangles).
 
 Here's a representation of the 16 rectangle zones the maze is made of.
-![rectangle zones](./htc3.png)
+![rectangle zones](./files/htc3.png)
 
 The main problem is that the code goes through ALL of the coordinates testing for EACH rectangle zone EVERY time, even if it has found already found the zone where the spaceship is. Each of these tests is made of 4 conditions (testing 2 limits of X and then 2 limits of Y). That's 4x16=64 conditions in a row ... and this is killing the game.
 
@@ -83,9 +83,9 @@ So the first thing that comes to mind is that once you know in which zone the sp
  162  IF (X >  = 100 AND X <  = 120) AND (Y >  = 60 AND Y <  = 80) THEN Z = 11: GOTO 175
  ```
 
-Test for yourself, here's the full code: [spacemaze_quickfix.bas](./spacemaze_quickfix.bas)
+Test for yourself, here's the full code: [spacemaze_quickfix.bas](./files/spacemaze_quickfix.bas)
 
-You may also load it from the DSK file: [htc1_spacemaze.dsk](./htc1_spacemaze.dsk) (file "SPACE MAZE QUICK FIX")
+You may also load it from the DSK file: [htc1_spacemaze.dsk](./files/htc1_spacemaze.dsk) (file "SPACE MAZE QUICK FIX")
 
 There's one drawback, however: the game will slow down as your spaceship enters more and more deeply into the maze. This is because we always check if the spaceship is in zone 1, then if not, check if it's in zone 2, then if not, check if it's in zone 3, etc. Once we're in zone 16, it will be like we didn't change anything to the code. We've seen that these tests take time and they should be reduced to a minimum.
 
@@ -126,7 +126,7 @@ also we can get rid of line 175 as we'll never reach it.
 
 And that's it ! the game is now smoothier and more responsive. Obviously it goes faster but despite that it's in fact easier to maneuver the spaceship.
 
-The whole modified code is here: [spacemaze_quickfix2.bas](./spacemaze_quickfix2.bas)
+The whole modified code is here: [spacemaze_quickfix2.bas](./files/spacemaze_quickfix2.bas)
 
 And it can be run from the DSK as "SPACE MAZE QUICK FIX 2"
 
@@ -150,7 +150,7 @@ Without going up until the point where all variables names are one letter only, 
  - pressing enter when giving choices will default to appropriate values (at least for me) highlighted by INVERSE characters.
  - I've added keyboard support, for now the game is easier in that mode than with the joystick but maybe we can alter that a bit in a future version ?
 
-All in all, here's the full modified code: [spacemaze_htc_v1.bas](./spacemaze_htc_v1.bas) 
+All in all, here's the full modified code: [spacemaze_htc_v1.bas](./files/spacemaze_htc_v1.bas) 
 
 You can run it from the DSK as "SPACE MAZE HTC V1"
 
