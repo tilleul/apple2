@@ -17,7 +17,7 @@ Let me present you **SPACE MAZE** !
 
 ## Overview
 
-Here's a link to the DSK file that contains the code (among others): https://archive.org/download/nibbledisks_nib01/nib01.dsk
+Here's a link to the DSK file that contains the code (among others): [htc1_spacemaze.dsk](./htc1_spacemaze.dsk)
 
 And here are two screenshots of the game...
 
