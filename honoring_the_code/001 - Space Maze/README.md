@@ -73,4 +73,43 @@ So the first thing that comes to mind is that once you know in which zone the sp
  162  IF (X >  = 100 AND X <  = 120) AND (Y >  = 60 AND Y <  = 80) THEN Z = 11: GOTO 175
  ```
 
-Test for yourself, here's the code: [spacemaze_quickfix.bas](./spacemaze_quickfix.bas)
+Test for yourself, here's the full code: [spacemaze_quickfix.bas](./spacemaze_quickfix.bas)
+
+You may also load it from the DSK file: [htc1_spacemaze.dsk](./htc1_spacemaze.dsk) (file "SPACE MAZE QUICK FIX")
+
+There's one drawback, however: the game will slow down as your spaceship enters more and more deeply into the maze. This is because we always check if the spaceship is in zone 1, then if not, check if it's in zone 2, then if not, check if it's in zone 3, etc. Once we're in zone 16, it will be like we didn't change anything to the code. We've seen that these tests take time and they should be reduced to a minimum.
+
+So why not use the value of Z to check only what is needed ? Since you're on zone Z, you can only go on zone Z-1 or zone Z+1. So all we have to do is use "ON Z GOSUB" and check for zone Z-1, Z and then Z+1 and if all failed, it means we're out of the maze.
+
+So, let's rewrite line 300 with ON GOSUB
+```basic
+ 300 XO = X:YO = Y: ON Z GOSUB 100, 100, 110, 120, 125,130,135,137,138,139,140,141,142,145,150,160: GOTO 210
+```
+
+What this will do is that if Z equals 1, we GOSUB to line 100 and test if we are still in zone 1 or if we moved to zone 2 (which are the only two possible zones where our spaceship can be). If not, then we crash. If Z equals 2, we GOSUB again to line 100 and test if we've moved back to zone 1, are still in zone 2 or moved into zone 3 (it's impossible to be in any other zone so all the other tests will fail and we will crash), etc.
+
+Lines 100-165 need to be altered so that the zone numbers are correct and so that we return from the calling ON GOSUB asap. Also we need to invert line 162 and 165 otherwise we cannot win the game.
+```basic
+ 100  IF (X >  = 10 AND X <  = 80) AND (Y >  = 80 AND Y <  = 100) THEN Z=1: RETURN
+ 110  IF (X >  = 60 AND X <  = 100) AND (Y >  = 100 AND Y <  = 120) THEN Z=2: RETURN
+ 120  IF (X >  = 80 AND X <  = 100) AND (Y >  = 120 AND Y <  = 158) THEN Z=3:  RETURN
+ 125  IF (X >  = 100 AND X <  = 140) AND (Y >  = 140 AND Y <  = 158) THEN Z=4:  RETURN
+ 130  IF (X >  = 120 AND X <  = 180) AND (Y >  = 120 AND Y <  = 140) THEN Z=5:  RETURN
+ 135  IF (X >  = 160 AND X <  = 220) AND (Y >  = 140 AND Y <  = 158) THEN Z=6:  RETURN
+ 137  IF (X >  = 200 AND X <  = 220) AND (Y >  = 110 AND Y <  = 140) THEN Z=7:  RETURN
+ 138  IF (X >  = 220 AND X <  = 265) AND (Y >  = 110 AND Y <  = 130) THEN Z=8:  RETURN
+ 139  IF (X >  = 245 AND X <  = 265) AND (Y >  = 40 AND Y <  = 110) THEN Z=9:  RETURN
+ 140  IF (X >  = 215 AND X <  = 245) AND (Y >  = 40 AND Y <  = 60) THEN Z=10:  RETURN
+ 141  IF (X >  = 215 AND X <  = 235) AND (Y >  = 60 AND Y <  = 100) THEN Z=11:  RETURN
+ 142  IF (X >  = 180 AND X <  = 235) AND (Y >  = 80 AND Y <  = 100) THEN Z=12:  RETURN
+ 145  IF (X >  = 180 AND X <  = 200) AND (Y >  = 60 AND Y <  = 100) THEN Z=13:  RETURN
+ 150  IF (X >  = 140 AND X <  = 180) AND (Y >  = 60 AND Y <  = 80) THEN Z=14:  RETURN
+ 160  IF (X >  = 100 AND X <  = 160) AND (Y >  = 40 AND Y <  = 60) THEN Z=15:  RETURN
+ 162  IF (X >  = 106 AND X <  = 114) AND (Y >  = 66 AND Y <  = 74) THEN 3000: REM  BRANCH TO WIN
+ 165  IF (X >  = 100 AND X <  = 120) AND (Y >  = 60 AND Y <  = 80) THEN Z=16:  RETURN
+```
+Line 170 does not need to check if Z=0. If we reach line 170 it means we crashed we can GOTO 4000 immediately.
+```basic
+170  GOTO 4000
+```
+and we can get rid of line 175 as we'll never reach it.
