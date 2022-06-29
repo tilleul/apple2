@@ -7,8 +7,33 @@ BUT ! ... Where there's light, there's hope !
 Here are several tricks you can use to optimize your Applesoft code for SPEED !
 
 ## Summary
+  * [Methodology](#methodology)
   * [Declare your most used variables first](#declare-your-most-used-variables-first)
 
+
+
+### Methodology
+To prove that some code snippets are faster than others, I'm using [AppleWin](https://github.com/AppleWin/AppleWin)n an Apple II emulator that has a cycle counting/difference feature. What I do is set a breakpoint on the Applesoft "RUN" statement in $D912 and another on the "END" statement in $D870. So everything between "RUN" (as detected by Applesoft) and "END" in the program is considered for cycles count.
+
+To make sure that code snippets compare, I initialize some variables with the same content, even if they're not used in the snippet, this is only to be fair for the snippet where it will be actually used. Doing so allows me to determine by difference the fastest snippet.
+
+For example:
+
+```BASIC
+10 B=17: C=2
+20 A=B/C
+30 END
+```
+
+compared with
+
+```basic
+10 B=17: C=2
+20 A=B/2
+30 END
+```
+
+this allows me to compare the speed of line 20. If line 10 did not include ``C=12``, then it would not be a fair comparison between the two snippets.
 
 
 ### Declare your most used variables first
