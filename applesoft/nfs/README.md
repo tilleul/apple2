@@ -13,7 +13,9 @@ Here are several tricks you can use to optimize your Applesoft code for SPEED !
 
 
 ### Methodology
-To prove that some code snippets are faster than others, I'm using [AppleWin](https://github.com/AppleWin/AppleWin)n an Apple II emulator that has a cycle counting/difference feature. What I do is set a breakpoint on the Applesoft "RUN" statement in $D912 and another on the "END" statement in $D870. So everything between "RUN" (as detected by Applesoft) and "END" in the program is considered for cycles count.
+Not only am I going to show you that some code is faster than other, I'm going to prove it !
+
+In order to do that, I'm using [AppleWin](https://github.com/AppleWin/AppleWin) an Apple II emulator that has a cycle counting/difference feature. What I do is set a breakpoint on the Applesoft "RUN" statement in $D912 and another on the "END" statement in $D870. So everything between "RUN" (as detected by Applesoft) and "END" in the program is considered for cycles count.
 
 To make sure that code snippets compare, I initialize some variables with the same content, even if they're not used in the snippet, this is only to be fair for the snippet where it will be actually used. Doing so allows me to determine by difference the fastest snippet.
 
