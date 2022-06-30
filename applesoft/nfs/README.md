@@ -45,5 +45,5 @@ You don't need to declare a variable to use it. As soon as a new variable name i
 
 Numeric (float/real and integer) variables, string variables and arrays are stored in several different ways but they all share one thing in common: once a variable is encountered and once its type has been determined, the Applesoft parser will search for the variable in one of the three memory locations in the same way: from the bottom to the top of memory.
 
-This means that variables are not "ordered" by their names ... It means that variable Z might be before variable A... It also means that the time spent to look for a variable depends on how soon it was found in the code.
+This means that variables are not "ordered" by their names ... It means that, in memory, variable Z might be before variable A... It also means that the time spent to look for a variable depends on how soon it was found in the code. How much time ? Let's find out.
 
