@@ -73,42 +73,44 @@ This takes 32423 cycles. That's a difference of 34 cycles. It looks insignifican
 Let's have another example. Now this time, we will declare 26 different variables named from ``A`` to ``Z`` and see the cycles count difference when accessing the first one or the last one declared.
 
 ```
-10 A=123: B=A: C=A: D=A: E=A: F=A: G=A: H=A: I=A: J=A: K=A: L=A: M=A: N=A: O=A: P=A: Q=A: R=A: S=A: T=A: U=A: V=A: W=A: X=A: Y=A: Z=A
+10 A=1: B=1: C=1: D=1: E=1: F=1: G=1: H=1: I=1: J=1: K=1: L=1: M=1: N=1: O=1: P=1: Q=1: R=1: S=1: T=1: U=1: V=1: W=1: X=1: Y=1: Z=1
 20 PRINT A
 30 END
 ```
-This took 73775 cycles. Second snippet is identical except we access variable ``Z``
+This took 82980 cycles. Second snippet is identical except we access variable ``Z`` instead of variable ``A``.
 
 ```
-10 A=123: B=A: C=A: D=A: E=A: F=A: G=A: H=A: I=A: J=A: K=A: L=A: M=A: N=A: O=A: P=A: Q=A: R=A: S=A: T=A: U=A: V=A: W=A: X=A: Y=A: Z=A
+10 A=1: B=1: C=1: D=1: E=1: F=1: G=1: H=1: I=1: J=1: K=1: L=1: M=1: N=1: O=1: P=1: Q=1: R=1: S=1: T=1: U=1: V=1: W=1: X=1: Y=1: Z=1
 20 PRINT Z
 30 END
 ```
-This took 74560 cycles. The difference is 785 cycles. Again, it's not gigantic. But ! Wait ! Remember that snippet in the first section ([Methodology](#methodology)) ? It had a difference of 363 cycles just by replacing a harcoded value of ``2`` with a variable name. It would mean that if we're not careful, we might lose the advantage we took for granted.
+This took 83765 cycles. The difference is 785 cycles. Again, it's not gigantic. But ! Wait ! Remember that snippet in the first section ([Methodology](#methodology)) ? It had a difference of 363 cycles just by replacing a harcoded value of ``2`` with a variable name. It would mean that if we're not careful, we might lose the advantage we took for granted.
 
 Let me rephrase this: imagine if Z was holding a value you need to use **OFTEN** ... myself I like to put **zero** in Z because it's obviously a good variable name for such a value ...
 
 Let's see that with two other snippets. Snippet #1 will declare ``Z`` first, snippet #2 will declare ``Z`` last and snippet #3 will not use ``Z`` but hardcoded value of ``0``
 
 ```
-10 Z=0: A=123: B=A: C=A: D=A: E=A: F=A: G=A: H=A: I=A: J=A: K=A: L=A: M=A: N=A: O=A: P=A: Q=A: R=A: S=A: T=A: U=A: V=A: W=A: X=A: Y=A
+10 Z=0: A=1: B=1: C=1: D=1: E=1: F=1: G=1: H=1: I=1: J=1: K=1: L=1: M=1: N=1: O=1: P=1: Q=1: R=1: S=1: T=1: U=1: V=1: W=1: X=1: Y=1
 20 PRINT Z
 30 END
 ```
-This took 67920 cycles (it is faster than the previous example because it prints a single number instead of 3 with ``123``)
+This took 75459 cycles
 
 Snippet #2:
 ```
-10 A=123: B=A: C=A: D=A: E=A: F=A: G=A: H=A: I=A: J=A: K=A: L=A: M=A: N=A: O=A: P=A: Q=A: R=A: S=A: T=A: U=A: V=A: W=A: X=A: Y=A: Z=0
+10 A=1: B=1: C=1: D=1: E=1: F=1: G=1: H=1: I=1: J=1: K=1: L=1: M=1: N=1: O=1: P=1: Q=1: R=1: S=1: T=1: U=1: V=1: W=1: X=1: Y=1: Z=0
 20 PRINT Z
 30 END
 ```
-
+This took 76244 cycles, a difference of 785 cycles !
 
 Snippet #3
 ```
-10 Z=0: A=123: B=A: C=A: D=A: E=A: F=A: G=A: H=A: I=A: J=A: K=A: L=A: M=A: N=A: O=A: P=A: Q=A: R=A: S=A: T=A: U=A: V=A: W=A: X=A: Y=A
+10 A=1: B=1: C=1: D=1: E=1: F=1: G=1: H=1: I=1: J=1: K=1: L=1: M=1: N=1: O=1: P=1: Q=1: R=1: S=1: T=1: U=1: V=1: W=1: X=1: Y=1: Z=0
 20 PRINT 0
 30 END
 ```
+This took 75890 cycles, a difference of only 431 cycles with the first snippet where we use Z=0 as the first declared variable, but also it's 354 cycles slower than the version where Z=0 is declared last ! Thus, negating any interest in replacing ``0`` with a variable if it's not declared in time !
 
+So which variables should you declare first ? and with many variables to declare, how do you know if it's best to use a variable or an actual value ?
