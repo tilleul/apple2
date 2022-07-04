@@ -116,7 +116,7 @@ Should you convert all your constants to variables ? My advice is yes, particula
 * Limits in your game like
 	*  the screen limits: think of ``VTAB 24``, ``HTAB 40``, ``SCRN(39,39)``, ``HPLOT 279,159`` or their upper boundaries like ``40``, ``280`` ``160`` and ``192``.
 	* loops' low and high limits: ``0``, ``1`` up to ``9`` , ``10`` or ``19`` and ``20``, etc. Think of ``FOR I=0 TO ...`` or ``FOR I=1 TO ...``
-* Usual PEEK/POKE/CALL locations like 
+* Usual ``PEEK/POKE/CALL`` locations like 
 	* ``49152`` (last key pressed), 
 	* ``49168`` (reset keyboard strobe), 
 	* ``49200`` (click speaker), 
