@@ -126,7 +126,7 @@ Should you convert all your constants to variables ? My advice is yes, particula
 	* or the text window limits in ``32-35``, 
 	* etc.
 
-Whatever the value, whether it's an integer or a real <sup>(*)</sup>, this rule will **always** speed your code, except if you're not careful about the next technique ...
+Whatever the value, whether it's an integer or a real <sup>(*)</sup>, this rule will **always** speed up your code, except if you're not careful about the next technique ...
 
 <sup>(*) strings are an entirely different matter</sup>
 
@@ -230,7 +230,7 @@ It's best to declare the variables used in your main game loop first. Most commo
 
 Once you know which variables you use in your main game loop, you need to consider the following:
 * how often do you use that variable in your game loop ? just count the occurrences ... the most used variables should be declared first and foremost
-* if the variable is used after an IF/THEN statement, take into account how likely the condition will evaluate to true or not.
+* if the variable is used after an ``IF/THEN`` statement, take into account how likely the condition will evaluate to true or not.
 
 Final example:
 In this snippet, ``X`` is incremented and checked against a maximum limit. In the extreme case where ``X`` exceeds the limit, its value is set to that limit.
