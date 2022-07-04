@@ -52,8 +52,10 @@ The actual difference of **723 cycles** does not really matter. What is importan
 
 # Summary
 1. [Use variables as placeholders for constant values](#1-use-variables-as-placeholders-for-constant-values)
+Accessing a known value in a variable is faster than deciphering values in code.
 2. [Declare your most used variables first](#2-declare-your-most-used-variables-first)
-3. (and many others) coming soon... 
+Create and/or reference the variables you're going to use the most as soon as possible
+4. (and many others) coming soon... 
 
 # 1) Use variables as placeholders for constant values
 Let's consider a code like ``K=PEEK(49152)`` (this code gets the ASCII code of the last key pressed, plus 128 if the keyboard probe has not been reset and store it in variable ``K``).
@@ -208,6 +210,8 @@ Snippet #3
 ```
 Line 20 took 20672 cycles, a difference of only 431 cycles with the first snippet where we use ``Z=0`` as the first declared variable, but also it's 354 cycles **faster** than the version where ``Z=0`` is declared last ! Thus, negating any interest in replacing ``0`` with a variable if it's not declared in time !
 
+Your most used variables should be declared first. In fact **you should have a line in your code where all these variables are declared/created before doing anything else**,  otherwise you might inadvertently create a variable. The most common error being to display the instructions or a splash screen for the game and then wait for a keypress with something like ``GET K$``, as ``K$`` might be your very first declared variable !
+
 So which variables should you declare first ? and with many variables to declare, how do you know if it's best to use a variable or an actual value ? It depends on many factors.
 
 It's best to declare the variables used in your main game loop first. Most common variables and constants are possibly:
@@ -255,3 +259,4 @@ The second snippet is identical except declaration of variables ``M`` and ``X`` 
 Line 20 here takes 5500 cycles, that's 136 cycles more. Nothing too drastic but every cycle counts !
 
 The same kind of process should be made with the variable ``U``. Should it be declared before ``M`` ? With these two snippets, ``U`` is referenced only once, whereas ``M`` could be referenced twice when ``X>M`` ... but it's probable that ``U`` (placeholder for the constant ``1``) is used elsewhere in the main game loop, while ``M`` has not many other uses than to check X-coordinates maximum limit ... so ``U`` will probably be more efficiently referenced if declared before ``M``.
+
