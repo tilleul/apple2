@@ -311,6 +311,6 @@ While line 20 of snippet #2:
 20 C = A+A+A
 30 END
 ```
-takes 3287 cycles, that is 49 cycles slower. Of course it gets worse with higher multiplication values.
+takes 3287 cycles, that is 51 cycles slower. Of course it gets worse with higher multiplication values.
 
 
