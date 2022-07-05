@@ -39,7 +39,11 @@ Snippet #2
 ```
 This is faster as line 20 took only 3236 cycles, a difference of **723 cycles** ! (and you already have a first technique to increase speed, I'll explain it later).
 
-Notice that both snippets have the exact same result: variable ``C`` now holds the value ``9`` (which is 18 divided by 2 or 18 multiplied by 0.5). All our snippets will have the same final effect, otherwise we would not be comparing fairly. For example, for the second snippet, if line 20 had been ``PRINT A*B`` it would be impossible to tell if the code is faster or slower thanks to the multiplication, the division, the variable attribution or the ``PRINT`` statement or a combination of these factors.
+Notice that both snippets have the exact same result: variable ``C`` now holds the value ``9`` (which is 18 divided by 2 or 18 multiplied by 0.5). 
+
+All our snippets will have the same final effect, otherwise we would not be comparing fairly. For example, the first snippet used a variable assignment in line 20 (``C=A/B``). For the second snippet, it's important we use another variable assignment (``C=A*B``) because we want to compare the speed of the multiplication and the speed of the division. If we had used ``A*B`` with a statement like ``PRINT A*B`` or ``K=PEEK(A*B)`` or ``HTAB A*B``, the cycles taken to handle the statement would disturb our measure and we would be comparing apples and oranges.
+
+It is also important that we did not use ``A=A*B``: even though it's a variable assignment, we would be reusing ``A`` and it has an impact on speed. If we want to reuse ``A`` then we need to do it in both snippets.
 
 The actual difference of **723 cycles** does not really matter. What is important is that the second snippet **actually runs** faster. Actual speed depends on several other factors which will be explained in this article.
 
