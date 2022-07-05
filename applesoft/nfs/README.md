@@ -24,7 +24,7 @@ In order to do that, I'm using [AppleWin](https://github.com/AppleWin/AppleWin),
 So, we are going to compare code snippets speed. For example, is it faster to divide a number by 2 or to multiply it by 0.5 ? To make sure we don't enter some special cases where values of ``zero`` are treated differently, we first initiate some variables, usually in line 10. The code we actually want to test will be in line 20 most of the time, while line 30 will be a simple ``END`` statement. ``END`` is not necessary normally to end a program but remember that the breakpoint in ``$D801`` only occurs when a **new line** is found, that's why we must finish our code with an ``END`` statement, on a new line
 
 Snippet #1:
-```
+```basic
 10 A=18: B=2
 20 C=A/B
 30 END
@@ -32,7 +32,7 @@ Snippet #1:
 Line 20 took 3959 cycles
 
 Snippet #2
-```
+```basic
 10 A=18: B=0.5
 20 C=A*B
 30 END
@@ -55,13 +55,19 @@ The actual difference of **723 cycles** does not really matter. What is importan
 * Sometimes, if you're not careful, using a technique explained here could be **slower** if you don't pay attention to other factors. If that's the case, it will be explained.
 
 # Summary
+## General tips
 1. [Use variables as placeholders for constant values](#1-use-variables-as-placeholders-for-constant-values)
 Accessing a known value in a variable is faster than deciphering values in code.
 2. [Declare your most used variables first](#2-declare-your-most-used-variables-first)
 Create and/or reference the variables you're going to use the most as soon as possible
-4. (and many others) coming soon... 
 
-# 1) Use variables as placeholders for constant values
+## Calculations
+3. [Use addition instead of multiplication by 2](#3-use-addition-instead-of-multiplication-by-2) Addition of the same variable twice is faster than multiplying the variable by 2
+
+(and many others) coming soon... 
+# General Tips
+
+## 1) Use variables as placeholders for constant values
 Let's consider a code like ``K=PEEK(49152)`` (this code gets the ASCII code of the last key pressed, plus 128 if the keyboard probe has not been reset and store it in variable ``K``).
 
 When this code is run , the Applesoft parser will perform the following:
@@ -86,13 +92,13 @@ It is probable that your game will need to read the keyboard regularly. Why do y
 It is actually faster for the Applesoft parser to locate a variable and use its value than to "recreate it from scratch". So, all you need to do is save in a variable the value you want to repeatedly use.
 
 For example:
-```
+```basic
 10 N=49152
 20 K=PEEK(N)
 30 END
 ```
 Line 20 takes 2303 cycles while
-```
+```basic
 10 N=49152
 20 K=PEEK(49152)
 30 END
@@ -100,13 +106,13 @@ Line 20 takes 2303 cycles while
 line 20 here takes 7128 cycles, that's a difference of **4825 cycles** ! This is ***HUGE*** especially when it's a statement that's going to be executed every time the main game loop cycles !
 
 Other values will produce different results. For a comparison example, let's say we want to read the value in memory location ``zero``.
-```
+```basic
 10 N=0
 20 K=PEEK(N)
 30 END
 ```
 Line 20 takes 2090 cycles, while
-```
+```basic
 10 N=0
 20 K=PEEK(0)
 30 END
@@ -134,7 +140,7 @@ Whatever the value, whether it's an integer or a real <sup>(*)</sup>, this rule 
 
 <sup>(*) strings are an entirely different matter</sup>
 
-# 2) Declare your most used variables first
+## 2) Declare your most used variables first
 Applesoft variables are stored in two separate areas: 
 * right after the program's last line is an area pointed by ``VARTAB`` (in zero-page vector ``$69-$6A`` -- decimal ``105-106``) where all the real, integer and string variables are defined and stored <sup>(*)</sup>. It's also where references to "functions" created by ``DEF FN`` are stored.
 * just after that area is another area, pointed by the vector ``ARYTAB`` (in ``$6B-$6``, decimal ``107-108``) where all the arrays are stored.
@@ -154,13 +160,13 @@ This means that variables are not "ordered" by their names ... It means that, in
 
 Let's create a variable ``A`` and another named ``Z`` with equal values, then let's print the value of variable ``A`` and then in a second snippet, the value of variable ``Z``.
 
-```
+```basic
 10 A=123: Z=A
 20 PRINT A
 30 END
 ```
 Line 20 takes 27864 cycles. The second snippet just prints variable ``Z`` instead of ``A``.
-```
+```basic
 10 A=123: Z=A
 20 PRINT Z
 30 END
@@ -169,14 +175,14 @@ This takes 27898 cycles. That's a difference of 34 cycles. It looks **insignific
 
 Let's have another example. Now this time, we will declare 26 different variables named from ``A`` to ``Z`` and see the cycles count difference when accessing the first one or the last one declared.
 
-```
+```basic
 10 A=0: B=1: C=1: D=1: E=1: F=1: G=1: H=1: I=1: J=1: K=1: L=1: M=1: N=1: O=1: P=1: Q=1: R=1: S=1: T=1: U=1: V=1: W=1: X=1: Y=1: Z=0
 20 PRINT A
 30 END
 ```
 Line 20 took 20241 cycles. Second snippet is identical except we access variable ``Z`` instead of variable ``A``. You'll notice that the values of these two variables are identical to eliminate the possible fact that different values are handled with different speeds.
 
-```
+```basic
 10 A=0: B=1: C=1: D=1: E=1: F=1: G=1: H=1: I=1: J=1: K=1: L=1: M=1: N=1: O=1: P=1: Q=1: R=1: S=1: T=1: U=1: V=1: W=1: X=1: Y=1: Z=0
 20 PRINT Z
 30 END
@@ -191,7 +197,7 @@ Let me rephrase this: imagine if Z was holding a value you need to use **OFTEN**
 
 Let's see that with two other snippets. Snippet #1 will declare ``Z`` first, snippet #2 will declare ``Z`` last and snippet #3 will not use ``Z`` but a hardcoded value of ``0``
 
-```
+```basic
 10 Z=0: A=0: B=1: C=1: D=1: E=1: F=1: G=1: H=1: I=1: J=1: K=1: L=1: M=1: N=1: O=1: P=1: Q=1: R=1: S=1: T=1: U=1: V=1: W=1: X=1: Y=1
 20 PRINT Z
 30 END
@@ -199,7 +205,7 @@ Let's see that with two other snippets. Snippet #1 will declare ``Z`` first, sni
 Line 20 took 20241 cycles (same cycle count as when ``A`` was declared first and we wanted to print the value of ``A``)
 
 Snippet #2:
-```
+```basic
 10 A=0: B=1: C=1: D=1: E=1: F=1: G=1: H=1: I=1: J=1: K=1: L=1: M=1: N=1: O=1: P=1: Q=1: R=1: S=1: T=1: U=1: V=1: W=1: X=1: Y=1: Z=0
 20 PRINT Z
 30 END
@@ -207,7 +213,7 @@ Snippet #2:
 Line 20 took 21026 cycles, it's **slower**, with a difference of 785 cycles !
 
 Snippet #3
-```
+```basic
 10 A=0: B=1: C=1: D=1: E=1: F=1: G=1: H=1: I=1: J=1: K=1: L=1: M=1: N=1: O=1: P=1: Q=1: R=1: S=1: T=1: U=1: V=1: W=1: X=1: Y=1: Z=0
 20 PRINT 0
 30 END
@@ -263,4 +269,48 @@ The second snippet is identical except declaration of variables ``M`` and ``X`` 
 Line 20 here takes 5500 cycles, that's 136 cycles more. Nothing too drastic but every cycle counts !
 
 The same kind of process should be made with the variable ``U``. Should it be declared before ``M`` ? With these two snippets, ``U`` is referenced only once, whereas ``M`` could be referenced twice when ``X>M`` ... but it's probable that ``U`` (placeholder for the constant ``1``) is used elsewhere in the main game loop, while ``M`` has not many other uses than to check X-coordinates maximum limit ... so ``U`` will probably be more efficiently referenced if declared before ``M``.
+
+# Calculations
+## 3) Use addition instead of multiplication by 2
+Multiplication is just another form of addition. And when multiplying by 2, it's faster to use the addition counterpart. This is **always** true if you use variables and replace hardcoded constants with variables (see section [Use variables as placeholders for constant values](#1-use-variables-as-placeholders-for-constant-values)). If you don't, you might get mitigated results.
+
+Demonstration:
+```basic
+10 A=123: B=2
+20 C = A*B
+30 END
+```
+Line 20 takes 3236 cycles.
+
+Snippet #2:
+```basic
+10 A=123: B=2
+20 C = A+A
+30 END
+```
+Line 20 takes now 2321 cycles, a bonus of 915 cycles.
+
+Of course it would be even more drastic if you didn't store (and use !) the constant ``2`` in variable ``B``
+```basic
+10 A=123: B=2
+20 C = A*2
+30 END
+```
+Line 20 takes 3599 cycles, that's 1278 cycles more than using an addition !
+
+Unfortunately, this tip does not work for anything else than multiplication by 2. Let's see what happens with multiplication by 3:
+```basic
+10 A=123: B=3
+20 C = A*B
+30 END
+```
+Line 20 takes 3236 cycles (again)
+While line 20 of snippet #2:
+```basic
+10 A=123: B=2
+20 C = A+A+A
+30 END
+```
+takes 3287 cycles, that is 49 cycles slower. Of course it gets worse with higher multiplication values.
+
 
