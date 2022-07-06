@@ -56,13 +56,11 @@ The actual difference of **723 cycles** does not really matter. What is importan
 
 # Summary
 ## General tips
-1. [Use variables as placeholders for constant values](#1-use-variables-as-placeholders-for-constant-values)
-Accessing a known value in a variable is faster than deciphering values in code.
-2. [Declare your most used variables first](#2-declare-your-most-used-variables-first)
-Create and/or reference the variables you're going to use the most as soon as possible
+1. [Use variables as placeholders for constant values](#1-use-variables-as-placeholders-for-constant-values): accessing a known value in a variable is faster than deciphering values in code.
+2. [Declare your most used variables first](#2-declare-your-most-used-variables-first): create and/or reference the variables you're going to use the most as soon as possible
 
 ## Calculations
-3. [Use addition instead of multiplication by 2](#3-use-addition-instead-of-multiplication-by-2) Addition of the same variable twice is faster than multiplying the variable by 2
+3. [Use addition instead of multiplication by 2](#3-use-addition-instead-of-multiplication-by-2): addition of the same variable twice is faster than multiplying the variable by 2
 
 (and many others) coming soon... 
 # General Tips
