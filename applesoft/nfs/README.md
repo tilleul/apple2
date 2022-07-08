@@ -148,7 +148,9 @@ Applesoft variables are stored in two separate areas:
 You don't need to declare a variable to use it. As soon as a variable name is discovered by the Applesoft parser, the following happens:
 * the type of the variable is determined so Applesoft knows where to look for the variable's name (``VARTAB`` or ``ARYTAB``)
 * Applesoft scans the memory repository for the specified variable type and looks for an existing variable of the same name
-	* if it's not found, it means it's a new variable and the appropriate space (variable name, type, array indices, value) is reserved at the top of the memory pile where all variables of the same type reside (optionnally moving the ``ARYTAB`` area up if a new real/integer/string/function variable needs to be declared). The new variable's value is referenced for next step
+	* if it's not found, it means it's a new variable. 
+		* If the code where it appears is a variable assignment, then the appropriate space (variable name, type, array indices, value) is reserved at the top of the memory pile where all variables of the same type reside (optionnally moving the ``ARYTAB`` area up if a new real/integer/string/function variable needs to be declared). 
+		* If it's not a variable asssignment, then variable type's default value is referenced for next step but the variable IS NOT created.
 	* if the variable already exists, its value is referenced for the next step
 * then the value of the variable is used/replaced/computed/etc. (depending on the actual code)
 
