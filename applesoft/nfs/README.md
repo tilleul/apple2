@@ -47,7 +47,7 @@ It is also important that we did not use ``A=A*B``: even though it's a variable 
 
 The actual difference of **723 cycles** does not really matter. What is important is that the second snippet **actually runs** faster. Actual speed depends on several other factors which will be explained in this article.
 
-***Remember***: 
+## &#x1F34E; Keep in mind the following
 * The cycles count on this page are only an indication of the speed of the code we want to "benchmark".
 * The exact cycle count is **not** what matters. 
 * **Comparison** of cycles count is what we're studying. 
@@ -66,6 +66,7 @@ The actual difference of **723 cycles** does not really matter. What is importan
 # General Tips
 
 ## 1) Use variables as placeholders for constant values
+### &#x1F34E; How Applesoft works with hardcoded constants
 Let's consider a code like ``K=PEEK(49152)`` (this code gets the ASCII code of the last key pressed, plus 128 if the keyboard probe has not been reset and store it in variable ``K``).
 
 When this code is run , the Applesoft parser will perform the following:
@@ -87,7 +88,8 @@ The bottleneck here are the steps 4-6. Building a integer representing a memory 
 
 It is probable that your game will need to read the keyboard regularly. Why do you have to repeat steps 4-6 every time you need to get the last key pressed ? Fortunately, there's a workaround.
 
-It is actually faster for the Applesoft parser to locate a variable and use its value than to "recreate it from scratch". So, all you need to do is save in a variable the value you want to repeatedly use.
+### &#x1F34E; Use variables instead of constants
+It is actually faster for the Applesoft parser to locate a variable in memory and use its value than to "recreate it from scratch". So, all you need to do is save in a variable the value you want to repeatedly use.
 
 For example:
 ```basic
@@ -117,6 +119,7 @@ Line 20 takes 2090 cycles, while
 ```
 this line 20 only takes **390** more cycles. This is because ``0`` is only 1 character, while ``49152`` is 5 characters. But anyway, even if the difference is not that important, it's faster.
 
+### &#x1F34E; Recommendations
 Should you convert all your constants to variables ? My advice is yes, particularly for the constants used in loops or repeatedly. Among those are:
 
 * Values you might use constantly (often powers of 2) like ``4``, ``8``, ``16``, ``32``, ``64``, ``128`` and ``256`` ... or maybe their lower limits like ``3``, ``7``, ``15``, ``31``, ``63``, ``127`` and ``255``
@@ -139,6 +142,7 @@ Whatever the value, whether it's an integer or a real <sup>(*)</sup>, this rule 
 <sup>(*) strings are an entirely different matter</sup>
 
 ## 2) Declare your most used variables first
+### &#x1F34E; How Applesoft variables work
 Applesoft variables are stored in two separate areas: 
 * right after the program's last line is an area pointed by ``VARTAB`` (in zero-page vector ``$69-$6A`` -- decimal ``105-106``) where all the real, integer and string variables are defined and stored <sup>(*)</sup>. It's also where references to "functions" created by ``DEF FN`` are stored.
 * just after that area is another area, pointed by the vector ``ARYTAB`` (in ``$6B-$6``, decimal ``107-108``) where all the arrays are stored.
@@ -149,8 +153,8 @@ You don't need to declare a variable to use it. As soon as a variable name is di
 * the type of the variable is determined so Applesoft knows where to look for the variable's name (``VARTAB`` or ``ARYTAB``)
 * Applesoft scans the memory repository for the specified variable type and looks for an existing variable of the same name
 	* if it's not found, it means it's a new variable. 
-		* If the code where it appears is a variable assignment, then the appropriate space (variable name, type, array indices, value) is reserved at the top of the memory pile where all variables of the same type reside (optionnally moving the ``ARYTAB`` area up if a new real/integer/string/function variable needs to be declared). 
-		* If it's not a variable asssignment, then variable type's default value is referenced for next step but the variable IS NOT created.
+		* If the code where it appears is a variable assignment, then the appropriate space (variable name, type, array indices, value) is reserved at the top of the memory pile where all variables of the same type reside (optionally moving the ``ARYTAB`` area up if a new real/integer/string/function variable needs to be declared). 
+		* If it's not a variable assignment, then the variable type's default value is referenced for next step but the variable IS NOT created.
 	* if the variable already exists, its value is referenced for the next step
 * then the value of the variable is used/replaced/computed/etc. (depending on the actual code)
 
@@ -158,6 +162,7 @@ As you see, numeric (float/real and integer) variables, string variables and arr
 
 This means that variables are not "ordered" by their names ... It means that, in memory, variable Z might be stored/referenced before variable A... It also means that the time spent to look for a variable depends on how soon it was found in the code. How much time ? Let's find out.
 
+### &#x1F34E; Variables declared later in the code are recovered last
 Let's create a variable ``A`` and another named ``Z`` with equal values, then let's print the value of variable ``A`` and then in a second snippet, the value of variable ``Z``.
 
 ```basic
@@ -193,6 +198,7 @@ But ! Wait ! Remember that snippet in the section [Use variables as placeholders
 
 It had a difference of 390 cycles just by replacing a hardcoded/constant value of ``0`` with a variable name. It would mean that if we're not careful, we might lose the advantage we took for granted.
 
+### &#x1F34E; The more variables you have, the more this rule is primordial
 Let me rephrase this: imagine if Z was holding a value you need to use **OFTEN** ... myself I like to put **zero** in Z because it's obviously a good variable name for such a value ...
 
 Let's see that with two other snippets. Snippet #1 will declare ``Z`` first, snippet #2 will declare ``Z`` last and snippet #3 will not use ``Z`` but a hardcoded value of ``0``
@@ -220,6 +226,7 @@ Snippet #3
 ```
 Line 20 took 20672 cycles, a difference of only 431 cycles with the first snippet where we use ``Z=0`` as the first declared variable, but also it's 354 cycles **faster** than the version where ``Z=0`` is declared last ! Thus, negating any interest in replacing ``0`` with a variable if it's not declared in time !
 
+### &#x1F34E; Recommendations
 Your most used variables should be declared first. In fact **you should have a line in your code where all these variables are declared/created before doing anything else**,  otherwise you might inadvertently create a variable. The most common error being to display the instructions or a splash screen for the game and then wait for a keypress with something like ``GET K$``, as ``K$`` might be your very first declared variable !
 
 So which variables should you declare first ? and with many variables to declare, how do you know if it's best to use a variable or an actual value ? It depends on many factors.
@@ -242,7 +249,7 @@ Once you know which variables you use in your main game loop, you need to consid
 * how often do you use that variable in your game loop ? just count the occurrences ... the most used variables should be declared first and foremost
 * if the variable is used after an ``IF/THEN`` statement, take into account how likely the condition will evaluate to true or not.
 
-Final example:
+### &#x1F34E; Final example to sum it all up
 In this snippet, ``X`` is incremented and checked against a maximum limit. In the extreme case where ``X`` exceeds the limit, its value is set to that limit.
 This is the kind of code that typically happens when drawing a moving object on the screen.
 
@@ -272,7 +279,8 @@ The same kind of process should be made with the variable ``U``. Should it be de
 
 # Calculations
 ## 3) Use addition instead of multiplication by 2
-Multiplication is just another form of addition. And when multiplying by 2, it's faster to use the addition counterpart. 
+### &#x1F34E; Multiplication is just another form of addition.
+And when multiplying by 2, it's faster to use the addition counterpart. 
 
 This is **always** true if what you want to do is ``A=2*B`` and that you use variables and replace hardcoded constants with variables (see section [Use variables as placeholders for constant values](#1-use-variables-as-placeholders-for-constant-values)). If you don't, you might get mitigated results.
 
@@ -315,7 +323,8 @@ While line 20 of snippet #2:
 ```
 takes 3287 cycles, that is 51 cycles slower. Of course it gets worse with higher multiplication values.
 
-It's also important to notice that this will work only if you already have in a variable the value you want to double.
+### &#x1F34E; Restrictions
+It's also important to notice that this will work only if you already have a variable with the value you want to double.
 
 Let's consider the following, you want to double the result of another calculation, like a division with code like ``D=2*A/B``
 
