@@ -68,7 +68,7 @@ All our snippets will have the same final effect, otherwise we would not be comp
 
 It is also important that we did not use ``A=A*B``: even though it's a variable assignment, we would be reusing ``A`` and it has an impact on speed. If we want to reuse ``A`` then we need to do it in both snippets.
 
-The actual difference of **723 cycles** does not really matter. What is important is that the second snippet **actually runs** faster. Actual speed depends on several other factors which will be explained in this article. &amp;
+The actual difference of **723 cycles** does not really matter. What is important is that the second snippet **actually runs** faster. Actual speed depends on several other factors which will be explained in this article.
 
 ### 🍎 Keep in mind the following
 
