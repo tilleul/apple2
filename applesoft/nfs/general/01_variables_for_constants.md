@@ -1,5 +1,5 @@
 # Use variables as placeholders for constant values
-Where we discover that *constantly* parsing constants is cycles consuming.
+Where we discover that *constantly* parsing *constants* is cycles consuming.
 ## Summary
 - [How Applesoft works with hardcoded constants](#-how-applesoft-works-with-hardcoded-constants)
 - [Use variables instead of constants](#-use-variables-instead-of-constants)
