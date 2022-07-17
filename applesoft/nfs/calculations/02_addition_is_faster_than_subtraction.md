@@ -1,10 +1,10 @@
 # Addition is faster than subtraction
 Where we learn that negativity might be a positive thing even though subtraction is not.
 ## Summary
-* [Simple cycles comparison](#simple-cycles-comparison)
+* [Simple cycles comparison](#-simple-cycles-comparison)
 * [Adding negative numbers is only slightly faster than subtraction](#-adding-negative-numbers-is-only-slightly-faster-than-subtraction)
-* [Avoiding subtraction: is it worth it ?](#-avoiding-subtraction-is-it-worth-it)
-* [When is it worth to substitute subtraction with addition then ?](#-when-is-it-worth-to-substitute-subtraction-with-addition-then)
+* [Avoiding subtraction: is it worth it ?](#-avoiding-subtraction-is-it-worth-it-)
+* [When is it worth to substitute subtraction with addition then ?](#-when-is-it-worth-to-substitute-subtraction-with-addition-then-)
 * [Recommendations](#-recommendations)
 
 ## 🍎 Simple cycles comparison
@@ -27,7 +27,7 @@ It would take 2327 cycles, a difference of **156** cycles in favor of addition.
 
 Knowing that, your initial intuition would be to replace subtraction with additions whenever possible. It's easy as all you have to do is to make the second operand negative. Unfortunately ...
 
-## 🍎Adding negative numbers is only slightly faster than subtraction
+## 🍎 Adding negative numbers is only slightly faster than subtraction
 
 With the previous example, if `B` is negative, we have
 
@@ -39,7 +39,7 @@ With the previous example, if `B` is negative, we have
 
 Line 20 takes 2307 cycles, which is marginally faster (20 cycles) than subtracting a positive number. Is it always like that ?
 
-## 🍎Avoiding subtraction: is it worth it ?
+## 🍎 Avoiding subtraction: is it worth it ?
 
 Here's a real life example where you might be tempted to add a negative number instead of subtracting a positive number to obtain the same result.
 
@@ -94,7 +94,7 @@ We now have 5826 cycles for line 20, this is just 20 cycles faster than if we ha
 
 As you can imagine, inverting the order of declaration of ``E`` and ``D`` is not worth it. ``D`` is now declared last, which might have an impact on speed on other parts of our code where the constant ``2`` is more important than ``-2`` ...
 
-## 🍎When is it worth to substitute subtraction with addition then ?
+## 🍎 When is it worth to substitute subtraction with addition then ?
 
 Adding the negative of a number (instead of subtraction) has rarely a positive impact on speed. 
 
@@ -130,7 +130,7 @@ Line 20 took 3253 cycles. Now if we replace line 20 with
 
 it only takes 3099 cycles, which is 154 cycles faster.
 
-## 🍎Recommendations
+## 🍎 Recommendations
 
 * Addition is faster than subtraction, so whenever possible use addition instead of subtraction, unless it means using a negative number for the second operand of the addition <sup>(*)</sup>.
 
