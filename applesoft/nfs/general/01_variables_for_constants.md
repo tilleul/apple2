@@ -50,7 +50,7 @@ Line 20 takes 2303 cycles while
 ```
 
 line 20 here takes 7128 cycles, that's a difference of **4825 cycles** ! This is ***HUGE*** especially when it's a statement that's going to be executed every time the main game loop cycles !
-
+<a name="constant0"></a>
 Other values will produce different results. For a comparison example, let's say we want to read the value in memory location ``zero``.
 
 ```basic
