@@ -3,7 +3,6 @@ Where we learn that first come is first served.
 ## Summary
 - [How Applesoft variables work](#-how-applesoft-variables-work)
 - [Variables declared later in the code are recovered last](#-variables-declared-later-in-the-code-are-recovered-last)
-- [With many variables, it's essential to follow this rule](#-with-many-variables-its-essential-to-follow-this-rule)
 - [Recommendations](#-recommendations)
 
 ## 🍎 How Applesoft variables work
@@ -57,7 +56,7 @@ Let's have another example. Now this time, we will declare 26 different variable
 30 END
 ```
 
-Line 20 took 20241 cycles. Second snippet is identical except we access variable ``Z`` instead of variable ``A``. You'll notice that the values of these two variables are identical to eliminate the possible fact that different values are handled with different speeds.
+Line 20 took 20241 cycles. Second snippet is identical except we access variable ``Z`` instead of variable ``A``. You'll notice that the values of these two variables are identical to eliminate the fact that different values are handled with different speeds.
 
 ```basic
 10 A=0: B=1: C=1: D=1: E=1: F=1: G=1: H=1: I=1: J=1: K=1: L=1: M=1: N=1: O=1: P=1: Q=1: R=1: S=1: T=1: U=1: V=1: W=1: X=1: Y=1: Z=0
@@ -65,45 +64,23 @@ Line 20 took 20241 cycles. Second snippet is identical except we access variable
 30 END
 ```
 
-This took 21026 cycles. The difference is **only** 785 cycles. Let's be honest, it's not gigantic. 
+This took 21026 cycles. The difference is **only** 785 cycles **slower**. Let's be honest, it's not gigantic. 
 
-But ! Wait ! Remember that snippet in the section [Use variables as placeholders for constant values](#use-variables-as-placeholders-for-constant-values) where we handled value ``0`` ? 
-
-It had a difference of 390 cycles just by replacing a hardcoded/constant value of ``0`` with a variable name. It would mean that if we're not careful, we might lose the advantage we took for granted.
-
-## 🍎 With many variables, it's essential to follow this rule
-
-Let me rephrase this: imagine if Z was holding a value you need to use **OFTEN** ... myself I like to put **zero** in Z because it's obviously a good variable name for such a value ...
-
-Let's see that with two other snippets. Snippet #1 will declare ``Z`` first, snippet #2 will declare ``Z`` last and snippet #3 will not use ``Z`` but a hardcoded value of ``0``
-
+But ! Wait ! Remember that snippet in the section [Use variables as placeholders for constant values](variables-for-constant.md#constant0) where we handled value ``0`` ? Because we stored the constant ``0``  in a variable, we won 390 cycles every time used that variable instead of the hardcoded constant. Is it the case here ? Let's just replace line 20 with
 ```basic
-10 Z=0: A=0: B=1: C=1: D=1: E=1: F=1: G=1: H=1: I=1: J=1: K=1: L=1: M=1: N=1: O=1: P=1: Q=1: R=1: S=1: T=1: U=1: V=1: W=1: X=1: Y=1
-20 PRINT Z
-30 END
-```
-
-Line 20 took 20241 cycles (same cycle count as when ``A`` was declared first and we wanted to print the value of ``A``)
-
-Snippet #2:
-
-```basic
-10 A=0: B=1: C=1: D=1: E=1: F=1: G=1: H=1: I=1: J=1: K=1: L=1: M=1: N=1: O=1: P=1: Q=1: R=1: S=1: T=1: U=1: V=1: W=1: X=1: Y=1: Z=0
-20 PRINT Z
-30 END
-```
-
-Line 20 took 21026 cycles, it's **slower**, with a difference of 785 cycles !
-
-Snippet #3
-
-```basic
-10 A=0: B=1: C=1: D=1: E=1: F=1: G=1: H=1: I=1: J=1: K=1: L=1: M=1: N=1: O=1: P=1: Q=1: R=1: S=1: T=1: U=1: V=1: W=1: X=1: Y=1: Z=0
 20 PRINT 0
-30 END
 ```
+It is now actually faster to use the hardcoded constant as this line 20 only takes 20672 cycles, a difference of 354 cycles **faster**.
 
-Line 20 took 20672 cycles, a difference of only 431 cycles with the first snippet where we use ``Z=0`` as the first declared variable, but also it's 354 cycles **faster** than the version where ``Z=0`` is declared last ! Thus, negating any interest in replacing ``0`` with a variable if it's not declared in time !
+It means that if we're not careful, we might lose the advantage we took for granted.
+
+Does it mean we should not always use constants/variables substitution ? No. 
+
+This is **rule #1**: you must replace hardcoded constants with variables.
+
+But **rule #2** is equally important: imagine Z is holding a value you need to use **OFTEN** ... myself I like to put **zero** in Z because it's obviously a good variable name for such a value ...
+
+What you need to do is declare ``Z`` at the right time, before less used variables. You need to count the occurrences of each variable in your main loop and declare the most used variables first.
 
 ## 🍎 Recommendations
 
