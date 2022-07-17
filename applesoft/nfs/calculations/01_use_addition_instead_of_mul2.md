@@ -1,8 +1,8 @@
 # Use addition instead of multiplication by 2
 Where fundamentals in mathematics might be useful for speed.
 ## Summary
-* [Multiplication is just another form of addition](#multiplication-is-just-another-form-of-addition)
-* [Restrictions](#restrictions)
+* [Multiplication is just another form of addition](#-multiplication-is-just-another-form-of-addition)
+* [Restrictions](#-restrictions)
 
 
 ## 🍎 Multiplication is just another form of addition.
