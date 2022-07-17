@@ -45,7 +45,7 @@ Every time a variable is parsed, it takes 56 more cycles to parse a 2-characters
   
   - If needed, re-use variables names declared before starting the main loop if these variables hold values you don't care about anymore.
   
-  - Remember to [declare your most used variables first](02-declare-your-most-used-variables-first.md) !
+  - Remember to [declare your most used variables first](02_declare_most_used_variables_first.md) !
 
 - Use as few two-characters variables names as possible in your main loop, as each 2-characters variable name will take 56 more cycles **just** to parse the name of the variable in the code.
 
