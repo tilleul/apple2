@@ -20,10 +20,10 @@ When this code is run , the Applesoft parser will perform the following:
    * then ``1``
    * then ``5``
    * then ``2``
-   5. Collating these, results in ``4 9 1 5 2`` as 5 ASCII characters. These represent, for us, humans, a decimal number but not yet for Applesoft.
-   6. These 5 characters will then be converted to a real number (using a format known as binary floating-point format)
-   7. Then, the real number is converted to an integer value (because ``PEEK`` expects a 2-bytes integer)
-   8. Once this has been done, the value in the appropriate location is read, converted from byte to a binary floating-point value and attributed to variable K
+5. Collating these, results in ``4 9 1 5 2`` as 5 ASCII characters. These represent, for us, humans, a decimal number but not yet for Applesoft.
+6. These 5 characters will then be converted to a real number (using a format known as binary floating-point format)
+7. Then, the real number is converted to an integer value (because ``PEEK`` expects a 2-bytes integer)
+8. Once this has been done, the value in the appropriate location is read, converted from byte to a binary floating-point value and attributed to variable K
 
 The bottleneck here are the steps 4-6. Building a integer representing a memory location from characters is long.
 
