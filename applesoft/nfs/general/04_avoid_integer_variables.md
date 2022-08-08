@@ -22,7 +22,7 @@ This memory is free for you to use if you want. To identify where it is, it's ea
 10 A% = 123: REM A% IS CREATED
 20 POKE 6, PEEK(131): POKE 7, PEEK(132): REM COPY ADDRESS IN $6-$7
 30 A= PEEK(6) + PEEK(7)*256 + 2: REM SKIP THE FIRST TWO BYTES
-40 REM A, A+1 AND A+2 ARE FREE TO USE
+40 REM MEMORY LOCATIONS POINTED BY A, A+1 AND A+2 ARE FREE TO USE
 ```
 If you didn't pick the address at the creation of the variable, simply reuse the variable in your code. A simple `A%=A%` will do the trick.
 
