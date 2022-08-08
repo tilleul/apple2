@@ -12,7 +12,7 @@ Where we learn that Applesoft's integers won't make you whole.
 - [Recommendations](#-recommendations)
 
 ## 🍎 How integer variables are handled
-Applesoft integer variables are variables whose name end with a "%" character. They can hold integer values from -32767 to 32767. That's almost the range of signed integer numbers on 2 bytes, but because of a bug in Applesoft you can't have -32768 ($8000) in an integer variable.
+Applesoft integer variables are variables whose name ends with a "%" character. They can hold integer values from -32767 to 32767. That's almost the range of signed integer numbers on 2 bytes, but because of a bug in Applesoft you can't have -32768 ($8000) in an integer variable.
 
 Integer variables are stored in memory in the same area as the other "simple" variables (floats, strings and ```DEF FN``` variables), by default right after the end of the program. If integer variables' values are limited to two bytes, they are in fact stored on five bytes, the last three being unused. These 3 unused bytes are reset to zero when the variable is created but subsequent assignments won't touch them. 
 
