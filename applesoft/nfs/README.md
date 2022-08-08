@@ -1,11 +1,10 @@
-
 # Applesoft: Need For Speed
 
-### So you like Applesoft ? And you think you can write an action game with it ?  Or maybe a science program ? Yes, you can ... will it be fast ? ... Probably not ...
+**So you like Applesoft ? And you think you can write an action game with it ?  Or maybe a science program ? Yes, you can ... will it be fast ? ... Probably not ...**
  
-### BUT, WAIT ! ... Where there's light, there's hope !
+**BUT, WAIT ! ... Where there's light, there's hope !**
  
-### Here are several tricks you can use to optimize your Applesoft code for SPEED !
+**Here are several tricks you can use to optimize your Applesoft code for SPEED !**
 
 
 Writing a fast action game in Applesoft is an antinomy: Applesoft is not fast enough for fast action games.
@@ -28,7 +27,7 @@ Applesoft: The Need For Speed is a series of articles that explain why some codi
 1. [Use variables as placeholders for constant values](general/01_variables_for_constants.md): accessing a known value in a variable is faster than deciphering values in code.
 2. [Declare your most used variables first](general/02_declare_most_used_variables_first.md): create and/or reference the variables you're going to use the most as soon1 as possible
 3. [Use one-letter variables names whenever possible](general/03_use_one_letter_variables_names.md): longer variables names take longer to parse.
-4. [Never use integer variables](04_never_use_integer_variables.md): they are always slower to use than float variables, even when you think they're not
+4. [Avoid integer variables](04_avoid_integer_variables.md): they are slower to use than float variables except for one case. And even then, they might be slower regardless.
 ### Calculations
 1. [Use addition instead of multiplication by 2](calculations/01_use_addition_instead_of_mul2.md): double addition of the same variable is faster than multiplying the variable by 2
 2. [Addition is faster than subtraction](calculations/02_addition_is_faster_than_subtraction.md): avoid subtraction whenever possible but don't use negative constants.
