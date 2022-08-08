@@ -9,7 +9,7 @@ Where fundamentals in mathematics might be useful for speed.
 
 And when you're multiplying by 2, it's faster to use the addition counterpart. 
 
-This is **always** true if what you want to do is ``A=2*B`` and that you use variables and replace hardcoded constants with variables (see section [Use variables as placeholders for constant values](#1-use-variables-as-placeholders-for-constant-values)). If you don't, you might get mitigated results.
+This is **always** true if what you want to do is ``A=2*B`` and that you use variables and replace hardcoded constants with variables. If you don't, you might get mitigated results.
 
 Demonstration:
 
