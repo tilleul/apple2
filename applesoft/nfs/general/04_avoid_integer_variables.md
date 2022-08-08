@@ -42,9 +42,9 @@ Then if the instruction it's being used in requires an integer (like it is with 
 
 And if the result of an operation needs to be stored in an integer variable, the float result is converted back to a 16-bit integer (with limits validation), slowing down the whole process even more.
 
-***Integer variables are slower and take as much space as real variables*** <sup>(*)</sup>. That's the thing to remember.
+***Integer variables are slower and take as much space as real variables***. That's the thing to remember. <sup>(*)</sup>
 
-<sup>The only exception being arrays of integers -- like `A%(n)` -- where the 16-bit value is actually stored on 2 bytes and not 5, but that's all. Accessing items in arrays of integers are always slower nonetheless, because the integer is converted to a float as soon as it's accessed.</sup>
+<sup>(*) The only exception being arrays of integers -- like `A%(n)` -- where the 16-bit value is actually stored on 2 bytes and not 5, but that's all. Accessing items in arrays of integers are always slower nonetheless, because the integer is converted to a float as soon as it's accessed.</sup>
 
 Every time you use an integer variable it will impact speed negatively. How much ? That depends on the final value that is handled, but every time you use an integer variable you lose around 200-350 cycles, depending on what you do with it.
 
@@ -62,11 +62,11 @@ with
 30 PRINT B%
 40 END
 ```
-Line 10 takes 6754 cycles in the first case and 7058 cycles in the second case. A difference of 304 cycles. In the second case, only conversion occurs: `-16384` as a float is converted to an integer value.
+Line 10 takes 6754 cycles in the first case and 7058 cycles in the second case. A difference of 304 cycles. In both cases, `-16384` is interpreted as a float number. But in the second case, that float needs to be converted to an integer to be stored in an integer variable.
 
-Line 20 takes 2441 cycles in the first case and 3047 cycles in the second case. A difference of 606 cycles ! This is because, in the second case, `A%` is first converted to float, then to integer then the read memory occurs and the result (a byte), is converted to float but because `B%` is an integer variable, it is again converted to integer. That's 4 conversions. In the first case, only two conversions occur: `A` (float) is converted to integer and the resulting byte of `PEEK` is converted to float to be stored into `B`.
+Line 20 takes 2441 cycles in the first case and 3047 cycles in the second case. A difference of 606 cycles ! This is because, in the second case, `A%` is first converted to float, then to an integer (because `PEEK` requires an integer value) then the memory is read memory and the result (a byte), is converted to float. But because `B%` is an integer variable, it is again converted to integer. That's 4 conversions. In the first case, only two conversions occur: `A` (float) is converted to integer and the resulting byte of `PEEK` is converted to float to be stored into `B`.
 
-Line 30 takes 26779 cycles in the first case and 27031 cycles in the second case. A difference of 252 cycles.
+Line 30 takes 26779 cycles in the first case and 27031 cycles in the second case. A difference of 252 cycles. 
 
 Does it really mean that integer variables are useless ? 
 
@@ -81,7 +81,7 @@ After all, this is what integer variables do ... convert numbers to integers !
 20 B=INT(A)
 30 END
 ```
-Line 20 takes 2259 cycles (this is approximately twice the time -- 1194 cycles -- it takes to just do `B=A` -- without `INT` of course; this just shows that `INT` **is** slow).
+Line 20 takes 2259 cycles. This is almost twice the time (1194 cycles) it takes to just assign the value of `A` to `B` (`B=A` instead of `B=INT(A)`). 
 
 ```basic
 10 A=17.1: B%=0
@@ -104,9 +104,9 @@ Line 20 takes 28773 cycles.
 20 B%=A: PRINT B%
 30 END
 ```
-Line 20 takes 28274 cycles. It's 499 cycles faster but because our code uses B% a second time, our advance of 721 cycles has been decreased by 222 cycles.
+Line 20 takes 28274 cycles. It's 499 cycles faster but because our code uses `B%` a second time, our advance of 721 cycles has been decreased by 222 cycles.
 
-This confirms that every time you use an integer variable (like `B%`) more than once in your code, you will lose ~200-350 cycles ... It means you can only use `B%` **two to four times** before losing the advantage of having NOT used `INT`. That's a significant drawback you must take into account. 
+This confirms that every time you use an integer variable (like `B%`) more than once in your code, you will lose ~200-350 cycles ... It means you can only use `B%` **two to four times** before losing the advantage of having NOT used `INT` and a real variable. That's a significant drawback you must take into account. 
 
 Knowing that, is it relevant to use integer variables ?
 
@@ -117,13 +117,13 @@ There are no Applesoft instruction that **require** an integer value as argument
 - then, if it's needed, they are converted to integers either on 2-bytes or 1-byte
 - then, their limits are validated, throwing an ILLEGAL QUANTITY ERROR if their value is out of bounds
 
-It means, you **don't need** to convert floats to integers when using numeric expressions with Applesoft instructions as Applesoft will do the conversion for you. You don't need `INT` and you don't need to use integer variables as arguments.
+It means, you **don't need** to convert floats to integers when using numeric expressions with Applesoft instructions as Applesoft will do the conversion for you. You don't need to use `INT` and you don't need to use integer variables for arguments/parameters.
 
 This is true for `PEEK`, `POKE`, `CALL`, `HTAB`, `VTAB`, `PLOT`, `HPLOT`, `SCRN`, `VLIN`, `HLIN`, `(X)DRAW`, `PDL` to name a few.
 
 This is also true for `ROT=`, `SCALE=`, `HCOLOR=`, `COLOR=` and even `SPEED=`, `LOMEM:` and `HIMEM:` !
 
-It even applies for string-related instructions: `LEFT$`, `MID$`, `RIGHT$` and `CHR$`.
+It even applies for numeric parameters used in string-related instructions: `LEFT$`, `MID$`, `RIGHT$` and `CHR$`.
 
 It applies for dimensioning arrays with `DIM` (e.g. `N=123.456: DIM A(N)` works).
 
@@ -137,12 +137,13 @@ ON RND(1)*10 GOTO 100,200,300,400
 ```
 and `INT` it totally superfluous !
 
-<sup>(*) ON/GOTO is faster than multiple IF/THEN conditions.</sup>
+<sup>(*) As we'll see in another chapter, ON/GOTO is faster than a sequence of multiple IF/THEN conditions and is the preferred method when your code needs branching.</sup>
 
 This is very useful for random events, AI decisions, or simply branching your code based on a calculation, for example you could scale a value and react accordingly:
 ```basic
 10 D=47: REM DISTANCE COVERED SO FAR
-20 Q=25: M=100: REM MAX DISTANCE
+20 M=100: REM MAX DISTANCE
+30 Q=25: REM DIVIDER (100/25 = 4 DIFFERENT MSGS + 1)
 ...
 100 ON D/Q GOTO 120, 130, 140, 150 : REM NO NEED TO USE INT HERE !
 110 PRINT "GOOD LUCK !": GOTO 160: REM 0-24
@@ -159,7 +160,7 @@ Remember that snippet ?
 20 B%=A: PRINT B%
 30 END
 ```
-Line 20 took 28274 cycles and it proved more efficient than using `INT`. But if you only need an integer value once, an `INT` will be faster because, unlike integer variables, you can use it inline a statement. 
+Line 20 took 28274 cycles and it proved more efficient than using `INT`. But if you only need an integer value once, an `INT` will be faster because, unlike integer variables, you can use it *inline* a statement. 
 
 Replace line 20 with
 ```basic
@@ -190,11 +191,11 @@ Second example:
 In this example, we're interested in both the amount found and the total. It makes sense to store the result in a temporary variable and since it requires an integer **value**, using an integer **variable** (even referenced 3 times in the code) will be around ~200-400 cycles faster than a real variable and using `INT`. 
 
 ### 3) Storage and access of integer variables
-As shown in the previous example, you should consider using integer variables when you need to use these integers values more than once in your code, for example for calculations in other formulas or other statements.
+As shown in the previous example, you should consider using integer variables when you need to use these integers values more than once in your code, for example for calculations in other formulas.
 
 However, you need to be careful.
 
-Imagine your game is played on a grid of some size. The player's XY coordinates are stored in the real variables `X` and `Y` and these are guaranteed to hold integer numbers at all times because the player can only move one tile/square at a time.
+Imagine your game is played on a grid of some size. The player's XY coordinates are stored in the real variables `X` and `Y` and these are guaranteed to hold integer numbers at all times because the player can only move to one tile/square at a time.
 An enemy's on the grid too and he moves randomly in both directions. To move it in the X-direction you use the following code (and a similar code to move the enemy in the Y-direction):
 ```basic
 EX% = EX% + RND(1)*3 - 1
@@ -208,20 +209,30 @@ EX = EX + INT(RND(1)*3 - 1)
 would be ~600-700 cycles slower.
 
 But:
-- you need to draw the enemy on screen, with `HTAB+PRINT` or `PLOT` or `HPLOT` or `(X)DRAW`. These statements work faster with real variables.
+- you need to draw the enemy on screen, with 
+	- `HTAB EX%: PRINT "X"` or 
+	- `PLOT EX%, EY%` or 
+	- `HPLOT EX%, EY%` or 
+	- `(X)DRAW E AT EX%,EY%`. 
 - you need to check if the player's position is the same as the enemy's
+	- `IF EX%=X AND EY%=Y THEN ...`
 - you need to erase the enemy on the next loop iteration, meaning 
 	- you might store the enemy's previous position in another set of variables
+		- `XE=EX%: YE=EY%` (no need to use integer variables like `XE%` or `YE%` since the conversion is already done)
 	- you'll do another call to `HTAB+PRINT`, `PLOT`, `HPLOT`, `(X)DRAW`
 - you might need to check if the enemy was hit by the player's projectile
+	- `IF EX%=PX AND EY%=PY THEN ...`
 - etc.
+
+Every time you use `EX%` (and `EY%`) you'll lose 200-350 cycles and after 3-5 times, using an real variable is a better choice.
+
 
 
 ## 🍎 Recommendations
 
-- **Avoid** integer variables: they're much slower than real variables and take as much memory.
+- The general rule is to **avoid** integer variables: they're much slower than real variables and take as much memory.
+- Integer variables are **never** needed as parameters of Applesoft instructions, so don't bother.
 - Integer variables **may be** faster than using `INT`. **But**:
-	- before using `INT`, check if you really need an integer value
-	- if the result of `INT` can be used in an inline statement and is never used again, `INT` will be faster than using a temporary/buffer integer variable
-	- don't bother with integer variables if you only use them as arguments or in formulas used as arguments of Applesoft instructions: Applesoft will convert any float value to an integer if the instruction requires an integer. The same is true if you use integer variables (even in mathematical formulas) as indices of arrays. Using an integer variable will only penalize you even more.
-	- if the integer variable is used more than twice in the code (main loop), you might lose any speed advantage you had.
+	- before using `INT`, check if you really need an integer value.
+	- if the result of `INT` can be used in an inline statement and is never used again, inline `INT` will be faster than using a temporary integer variable.
+	- if the integer variable is used more than twice in the main loop, you might lose any speed advantage you had.
