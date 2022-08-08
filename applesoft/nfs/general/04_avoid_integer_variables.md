@@ -46,7 +46,7 @@ And if the result of an operation needs to be stored in an integer variable, the
 
 <sup>(*) The only exception being arrays of integers -- like `A%(n)` -- where the 16-bit value is actually stored on 2 bytes and not 5, but that's all. Accessing items in arrays of integers are always slower nonetheless, because the integer is converted to a float as soon as it's accessed.</sup>
 
-Every time you use an integer variable it will impact speed negatively. How much ? That depends on the final value that is handled, but every time you use an integer variable you lose around 200-350 cycles, depending on what you do with it.
+Every time you use an integer variable it will impact speed negatively. How much ? That depends on the final value that is handled and what you do with it, but every time you use an integer variable you lose around 200-350 cycles.
 
 Let's compare
 ```basic
