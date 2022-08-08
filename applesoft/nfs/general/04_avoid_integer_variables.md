@@ -129,21 +129,27 @@ It applies for dimensioning arrays with `DIM` (e.g. `N=123.456: DIM A(N)` works)
 
 It applies to indices of arrays. It means that an array like `M(X, Y)` representing for example the player's X-Y position in a maze can be used without worrying about `X` and `Y` being integers.
 
-Strangely, it also works with `GOTO` and `GOSUB`, and though you'll probably never do it because you cannot use arithmetic expressions after `GOTO`/`GOSUB`, know that `GOTO 100.123456` works, as long as you have a line 100 in your code of course.
+It also works with `GOTO` and `GOSUB` but for another reason. Applesoft expects numbers after a `GOTO/GOSUB` instruction and once it finds a character that is not numeric, it will ignore every other character and just do his `GOTO/GOSUB`.
 
-But more interestingly, it works with `ON/GOTO-GOSUB` <sup>(*)</sup> This means you can do this:
+This means that 
+- `GOTO 100.123456` works but also 
+- `GOTO 100 THIS WON'T BE PARSED`,
+
+as long as you have a line 100 in your code of course.
+
+But more interestingly, you don't need to use integer values with `ON/GOTO-GOSUB` <sup>(*)</sup>. This means you can do this:
 ```basic
 ON RND(1)*10 GOTO 100,200,300,400
 ```
-and `INT` it totally superfluous !
+Using `INT` here is totally superfluous !
 
 <sup>(*) As we'll see in another chapter, ON/GOTO is faster than a sequence of multiple IF/THEN conditions and is the preferred method when your code needs branching.</sup>
 
-This is very useful for random events, AI decisions, or simply branching your code based on a calculation, for example you could scale a value and react accordingly:
+This is very useful for random events, AI decisions, or simply branching your code based on a calculation, for example you could scale a value and react accordingly without worrying about your scaled value being an integer:
 ```basic
 10 D=47: REM DISTANCE COVERED SO FAR
 20 M=100: REM MAX DISTANCE
-30 Q=25: REM DIVIDER (100/25 = 4 DIFFERENT MSGS + 1)
+30 Q=25: REM DIVIDER (100/25 = 4 DIFFERENT MSGS + 1 EXTRA)
 ...
 100 ON D/Q GOTO 120, 130, 140, 150 : REM NO NEED TO USE INT HERE !
 110 PRINT "GOOD LUCK !": GOTO 160: REM 0-24
@@ -213,19 +219,19 @@ But:
 	- `HTAB EX%: PRINT "X"` or 
 	- `PLOT EX%, EY%` or 
 	- `HPLOT EX%, EY%` or 
-	- `(X)DRAW E AT EX%,EY%`. 
+	- `(X)DRAW E AT EX%,EY%` or
+	- your own technique, but you still need to access `EX%` and `EY%`
 - you need to check if the player's position is the same as the enemy's
 	- `IF EX%=X AND EY%=Y THEN ...`
 - you need to erase the enemy on the next loop iteration, meaning 
-	- you might store the enemy's previous position in another set of variables
+	- you might need to store the enemy's previous position in another set of variables
 		- `XE=EX%: YE=EY%` (no need to use integer variables like `XE%` or `YE%` since the conversion is already done)
 	- you'll do another call to `HTAB+PRINT`, `PLOT`, `HPLOT`, `(X)DRAW`
 - you might need to check if the enemy was hit by the player's projectile
 	- `IF EX%=PX AND EY%=PY THEN ...`
 - etc.
 
-Every time you use `EX%` (and `EY%`) you'll lose 200-350 cycles and after 3-5 times, using an real variable is a better choice.
-
+Every time you use `EX%` (and `EY%`) you'll lose 200-350 cycles and after 3-5 times, using a real variable is a better choice.
 
 
 ## 🍎 Recommendations
