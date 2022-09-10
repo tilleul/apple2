@@ -36,13 +36,13 @@ Why has this code been showcased in the Paleotronic magazine ? Have they tried i
 
 Despite the awful speed, it seems like the author tried to optimize his code by using some known tricks, as pointed out by Paleotronic magazine:
 - use variables instead of hardcoded constants
-- do GOTO/GOSUBs as much as possible to the top of the program
+- do `GOTO/GOSUB`s as much as possible to the top of the program
 
-Unfortunately these optimizations are not consistent throughout the code and many constants are still hardcoded while the many GOTO/GOSUBs contribute to an ineffective spaghetti main game loop.
+Unfortunately these optimizations are not consistent throughout the code and many constants are still hardcoded while the many `GOTO/GOSUB`s contribute to an ineffective spaghetti main game loop.
 
 If you replace line 100 so that it `GOSUB 350` directly (thus removing the speed delay due to the game level), the main game loop takes **456000 cycles** only to let a piece fall down one position ! 
 
-As a comparison, the `HGR` command takes 278497 cycles. It means that just to draw a piece falling down from one position to the next, **it takes longer than two consecutive `HGR`s** ! And you know how `HGR` is slow because you can actually **see** how slowly it erases the hi-res screen when you run the command.
+As a comparison, the `HGR` command takes 278497 cycles. It means that just to draw a piece falling down from one position to the next, **it takes almost as long as two consecutive `HGR`s** ! And you know how `HGR` is slow because you can actually **see** how slowly it erases the hi-res screen when you run the command.
 
 One very good thing, again pointed out by Paleotronic magazine, is that the author used a clever technique to store the pieces (maybe this is how they do it in the original Tetris code ? I don't know). A bunch of `DATA` statements list all the possible orientation of the seven Tetris pieces/shapes. But instead of being data of what to draw, it's data to the 4 cells that each piece is made of, as offset coordinates.
 
@@ -60,7 +60,7 @@ So what can be done, if anything ?
 First, let's review the main bottlenecks and what could be done (in no particular order). Some of these might seem worthless to you, but remember that every cycle won means a faster game. Small streams make big rivers.
 
 - `VLIN` is used to draw two lo-res pixels vertically. This is the main bottleneck.
-	- Fix: see next section
+	- This requires a change of strategy. See next section for details.
 - Spaghetti code (too many `GOTO/GOSUB`s in all directions -- if you try to follow it manually, it will be hard to say where a `RETURN` will take you back to)
 	- Fixes:
 		- rewrite the main loop in a more straightforward/logical way
@@ -80,23 +80,21 @@ First, let's review the main bottlenecks and what could be done (in no particula
 	- Fix: remove arrays where possible		
 	- Fix: refactor two dimension arrays to one dimension arrays whenever possible (favor arithmetic for a single index instead of two indices)
 	- Fix: use a temp variable when the same array item is used more than once in the code
-- The code to check for keypresses uses a large array named `E()`, with a size of 128 items, one for each ASCII code. The value in the array range from 0 (key is not used) to 6. Values 1-6 are used in a `ON E(K) GOTO` statement that will branch the code to 6 subroutines to handle each keypress. The idea is interesting but badly implemented because `K` is manipulated way too much before being using in the `ON GOTO`.
+- The code to check for keypresses uses a large array named `E()`, with a size of 128 items, one for each ASCII code. The value in the array range from 0 (key is not used) to 6 (6 possible actions: left/down/right/rotate left/rotate right/quit). Values 1-6 are used in a `ON E(K) GOTO` statement that will branch the code to 6 subroutines to handle each keypress. The idea is interesting but badly implemented because `K` is manipulated way too much before being used in the `ON GOTO`.
 	- Fix: use a faster way to handle keypresses.
 - Code uses multiplication by 2
 	- Fix: always use addition on itself when multiplying by 2
 - Many two-letters variables' names
 	- Fix: exhaust one-letter variables first, for most used variables first.
 - There's a modulo check in there (on division by 4 on line 360)
-	- Fix: avoid modulo check using temp variables and simple arithmetic
-- There are some `INT` in code, although outside the main loop
-	- Fix: avoid `INT` if they're not really needed.
+	- Fix: most of the time, it's possible to avoid a modulo check by using temp variables and simple arithmetic; but as you'll see, in the end, the refactored code won't even need a modulo check
 
 ## 🍎Fixing the main bottleneck
 The most important bottleneck is these `VLIN`s to draw two vertical identical pixels in lo-res. If we want to do it in **pure Applesoft**, what can be done ?
 
 There are only two solutions:
 1. accept an aesthetic depreciation and plot rectangular cells
-2. find a faster way to plot two cells than using `VLIN`
+2. find a faster way to plot two pixels
 
 There would be no shame in solution #1. The game would look a little bit squashed but it could still be fun. Or maybe it could be horizontal instead of vertical ? After all, Steve Wozniak wrote his "Little Brick Out" game in Integer Basic as a horizontal Break Out game.
 
@@ -104,9 +102,9 @@ What about solution #2 ? How can we draw two vertical pixels faster ?
 
 ### 🍎PLOT two pixels with one instruction
 
-We know that `PLOT X,Y: PLOT X,Y+1` is slower than `VLIN Y, Y+1 AT X`. So we're out of options, no ? There are no more instructions to plot pixels on the lo-res screen, no ? You're right.
+We know that `PLOT X,Y: PLOT X,Y+1` is slower than `VLIN Y, Y+1 AT X`. So we're out of options, no ? There are no more instructions to plot pixels on the lo-res screen, no ? 
 
-But you're forgetting something: what we plot on the lo-res screen actually shows on the text-screen because the lo-res and text screen share the same memory location: $400-$7FF.
+You're right but you're forgetting something: what we plot on the lo-res screen actually shows on the text-screen too because the lo-res and text screen share the same memory location: $400-$7FF.
 
 And, **miracle**, two vertical pixels on even horizontal coordinates correspond to one character on the text screen. You've seen it before: type `GR` and then `TEXT` and 4/5 of your screen will be filled with `@` characters in `INVERSE`.
 
@@ -116,7 +114,11 @@ Let's try it:
 GR
 VTAB 1: PRINT "HELLO": VTAB 21
 ```
-You'll see some pixels on the lo-res screen. The first line will be one brown pixel (`H`), one gray (`E`), two green (`LL`), one white (`O`). The second line will be all green.
+You've just plotted some pixels on the lo-res screen. 
+
+![You've just plotted some pixels on the lo-res screen](img/capture1.png)
+
+The first lo-res line is now made of one brown pixel (`H`), one gray (`E`), two green (`LL`), one white (`O`). The second line will be all green.
 
 With just one `PRINT`, we've changed two lines of pixels ! Every character printed is represented by two colors on the lo-res screen. And it seems like L prints two green vertical pixels ! Great ! It means that we could do `PRINT "L"` whenever we want to draw a green cell !
 
@@ -135,6 +137,8 @@ Ok, now the problem is that we want "square" color cells, so what we need is to 
     400: 00 11 22 33 44 55 66 77 88 99 AA BB CC DD EE FF
 
 You should now have lines 0-1 of the lo-res screen with all possible lo-res colors.
+
+![lores colors](img/capture2.png)
 
 We already know that `PRINT`ing an "`L`" is the same as writing (`POKE`ing) `$CC` in the text/lo-res memory (`$CC` is decimal 204 -- `POKE 1024, 204` for instance will plot two light green pixels in 0,0 and 0,1)
 
