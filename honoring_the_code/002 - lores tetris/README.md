@@ -19,7 +19,7 @@
 
 
 ## 🍎Discovering the game
-Recently I've stumbled upon this page on paleotronic.com: 
+Recently I came across this page on paleotronic.com: 
 https://paleotronic.com/2018/06/26/tetris-for-applesoft-basic/
 
 It features a Tetris-clone written in Applesoft in lo-res graphics. The code is rather well-documented but unfortunately it cannot be copy/pasted as it's proposed as png files. However, the author has provided a DSK file on archive.org.
