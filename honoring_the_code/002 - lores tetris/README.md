@@ -148,9 +148,9 @@ To understand that we need to see how Applesoft (and the Apple II) outputs chara
 
 When Applesoft encounters a statement like `PRINT "L"`, it will convert the `L` character to its ASCII code (decimal 76, hex `4C`) and turn the 7th-bit (called the "hi-bit") of this value to 1. In practice, it means that all ASCII characters have now a value 128 higher. For `L`, we have 76+128=204.
 
-If the original value is below 32, it means it represents a "Control" character (a character that is a combination of the CTRL-key and a few selected characters, mostly the alphabet, but not the numbers !), for example CTRL-G (to bip the computer) or CTRL-H to go down one text line.
+If the original value is below 32, it means it represents a "Control" character (a character that is a combination of the CTRL-key and a few selected characters, mostly the alphabet, but not the numbers !), for example CTRL-G (to beep the computer) or CTRL-H to go down one text line.
 
-If the "new" value is above 160 (128+32), it means the original value was NOT the one of a control-character and Applesoft will apply a "mask" (called the "FLASH" mask) that will turn the 6th bit on if "`FLASH`" is on (or do nothing if it's not). 
+If the "new" value is above 160 (128+32), it means the original value was NOT the one of a control-character and Applesoft will apply a "mask" (called the "FLASH" mask) that will turn the 6th bit on if the `FLASH` text mode is on (or do nothing if it's not). 
 
 From there, Applesoft gives control to the Monitor ROM to handle the character to print and to set the horizontal/vertical position of the next character to print.
 
@@ -163,12 +163,16 @@ If `FLASH` was set, then the mask will clear only bit 7, and the value will be b
 All in all, we will have various values depending on the INVERSE and FLASH masks.
 
 - Values from 0 to 63 (\$00 to \$3F) will display `INVERSE` characters. But only a subset of characters can be displayed in INVERSE: the ASCII characters from 32 to 95 (that's all the printable characters minus the lower-case characters,  `{` `}` `|`, the backtick and `~`)
-- Values from 64 to 127 (\$40 to \$7F) will display FLASH characters. The subset of displayable characters in FLASH is the same as the one for INVERSE
-- Values from 160 to 255 (\$A0 to \$FF) will display NORMAL characters. The subset is made of all printable characters (from ASCII 32 to 127).
+- Values from 64 to 127 (\$40 to \$7F) will display `FLASH` characters. The subset of displayable characters in FLASH is the same as the one for INVERSE
+- Values from 160 to 255 (\$A0 to \$FF) will display `NORMAL` characters. The subset is made of all printable characters (from ASCII 32 to 127).
 
-What about values from 128 to 159 (\$80 to \$9F) ? These will display NORMAL characters from ASCII 64 to 95 but not Applesoft nor the Monitor routine will allow you to directly print these characters as they are the "Control" characters (normally their value is 0-31 but remember we added 128) and therefore are not printable on screen using `PRINT` or the `COUT` routine in the Monitor. Of course it's possible to directly write values 128-159 into screen memory using POKE or the equivalent command from machine language. But even `PRINT CHR$(129)` (this should print an `A`) won't work.
+What about values from 128 to 159 (\$80 to \$9F) ? These will display NORMAL characters from ASCII 64 to 95 but neither Applesoft nor the Monitor routine will allow you to directly print these characters as they are the "Control" characters (normally their value is 0-31 but remember we added 128) and therefore are not printable on screen using `PRINT` or the `COUT` routine in the Monitor. Of course it's possible to directly write values 128-159 into screen memory using POKE or the equivalent command from machine language. But even `PRINT CHR$(129)` (this should print an `A`) won't work.
 
-Ok, let's get back to Tetris. We want to see if it's possible to `PRINT` two vertical pixels of the same color; for that we need to play a little bit with the FLASH/INVERSE modes/masks. Are you still in the monitor with the upper screen in lo-res and the first two lines with all the available colors ? If so, now press CTRL-C to exit the monitor, and type `POKE 49233,0`, this will bring back text mode without scrolling the text screen. Now your screen is filled with `@` characters in `INVERSE` (this is value $00, two black pixels). Only the first line has different characters. They are:
+Ok, let's get back to Tetris. We want to see if it's possible to `PRINT` two vertical pixels of the same color; for that we need to play a little bit with the FLASH/INVERSE modes/masks. Are you still in the monitor with the upper screen in lo-res and the first two lines with all the available colors ? If so, now press CTRL-C to exit the monitor, and type `POKE 49233,0`, this will bring back text mode without scrolling the text screen. 
+
+![text colors](img/capture3.png)
+
+Now your screen is filled with `@` characters in `INVERSE` (this is value $00, two black pixels). Only the first line has different characters. They are:
 
 Character | Mode | Hex | Decimal | Color 
 |--|--|--|--|--|
