@@ -27,6 +27,8 @@ It features a Tetris-clone written in Applesoft in lo-res graphics. The code is 
 
 https://archive.org/details/AppleSoftTetris
 
+and I've made the code available here: [paleotronic_tetris.bas](paleotronic_tetris.bas)
+
 Ok, So let's run it.
 
 (a bit later ...)
