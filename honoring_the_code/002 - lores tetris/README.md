@@ -16,6 +16,7 @@
 	- [The fastest way](#the-fastest-way)
 - [Spaghetti code](#spaghetti-code)
 - [Little optimizations](#little-optimizations)
+- [Final code](#final-code)
 
 
 ## 🍎Discovering the game
@@ -310,7 +311,7 @@ Y.□.. 			Y....
 |.□..			|....
 |.□..			|....
 ```
-Alternating between these two positions will feel like the bar is rotating. But if our starting position is (0,0), how do we PRINT the cell in position (1,0) on the vertical bar ? We can only go left or down with the cursor. Going right or up is not possible.
+Alternating between these two positions will give the illusion the bar is rotating. But if our starting position is (0,0), how do we `PRINT` the cell in position (1,0) on the vertical bar ? We can only go left or down with the cursor. Going right or up is not possible.
 
 This is why, for every piece, we need to move our PRINT origin to (2,0). This way, we can go left and PRINT in (0,0) or (1,0) if needed and we can always go down afterwards.
 
@@ -327,35 +328,35 @@ Y.□■.
 |.□□.
 ```
 ### 🍎Final `PRINT` optimizations
-First, we'll make sure we always use a trailing ";" after a print like
+First, we'll make sure we always use a trailing ";" after a `PRINT`. Like this:
 ```basic
 PRINT A$;
 ```
-This is because if we omit the trailing ";" Applesoft will do a carriage return after having printer the variable on screen. Not that it's a problem for the cursor location but simply it's not needed and it takes a few more cycles unnecessarily (~290 cycles). 
+This is because if we omit the trailing ";" Applesoft will do a carriage return after having printed the variable on screen. Not that it's a problem for the cursor location but simply it's not needed and it takes a few more cycles unnecessarily (~290 cycles). 
 
-Also, we will check if DOS is loaded (with a very basic check) and if it is, we will unhook it. What is that ? When DOS is loaded it takes control over CSWL which is a vector in zero page that allows to customize character output on the screen. DOS uses this, among others, to handle the CTRL-D hidden command that allows use to use DOS commands with `PRINT` statements (like `PRINT CHR$(4);"CATALOG"` will output the disk catalog).
+Also, we will check if DOS is loaded (with a very basic check) and if it is, we will unhook it. What is that ? When DOS is loaded it takes control over CSWL which is a vector in zero page that allows to customize character output on the screen. DOS uses this, among others, to handle the CTRL-D hidden command that allows us to use DOS commands with `PRINT` statements (like `PRINT CHR$(4);"CATALOG"` will output the disk catalog).
 
 To unhook DOS, a simple `CALL 40672` will do.
 Once the game exits, it's important to reconnect DOS because then DOS commands won't work. To do that we use a `CALL 43089`.
 
-With DOS unhooked, it takes 191 cycles to print a character from a string variable. With DOS hooked, it takes 471 cycles to do the same task ! More than the **twice the time** ! We win 280 cycles per character printed.
+When DOS is unhooked, it takes 191 cycles to print a character from a string variable. With DOS hooked, it takes 471 cycles to do the same task ! More than the **twice the time** ! We win 280 cycles per character printed.
 
 ## 🍎Optimizing arrays
-The original code defines several arrays. Arrays, if not used wisely are speed bottlenecks. The more dimensions an array has, the longer it takes to access the item.
+The original code defines several arrays. Arrays, if not used wisely are speed bottlenecks. The more dimensions an array has, the longer it takes to access an item in the array.
 
-To gain speed, we need to reduce the number of dimensions of arrays. But that's not enough, because accessing the same data from a two-dimension array and a one-dimension array require some maths. And calculations take time.
+To gain speed, we need to reduce the number of dimensions of arrays. But that's not enough, because accessing the same data from a two-dimension array and a one-dimension array require some maths. And calculations take time too !
 
 Let's say you have a two-dimension array `A()`. The first dimension has `m` elements while the second has `n`. The array is then declared with `DIM A(m-1, n-1)`. To access the item with indices `X`, `Y` we do
 ```basic
     N = A(X,Y)
 ```
-Now, consider the equivalent one-dimension array `B()`. The array is declared with `DIM B(m*n-1)`. To access the same X/Y item, we do
+Now, consider the equivalent one-dimension array `B()`. The array has as many elements as `A()`, but it is declared with `DIM B(m*n-1)`. To access the same X/Y item, we do
 ```basic
 N = B(X*m + Y)
 ```
-The maths here make this second snippet slower (around ~1000 cycles depending on the `X`/`Y`/`m` values -- though, if we already had the result of `X*m+Y` in a variable, we would be around ~2000 cycles faster just because `B` is a one-dimensional array !). And thus it is clear that accessing "random/out-of-sequence" X/Y items is slower. 
+The maths here make this second snippet slower (around ~1000 cycles depending on the `X`/`Y`/`m` values. But, if we already had the result of `X*m+Y` in a variable, we would be around ~2000 cycles faster just because `B` is a one-dimensional array ! 
 
-But, if we access the array items in a mathematical sequence, we can be faster straight from the second accessed item.
+It is clear that accessing "random/out-of-sequence" X/Y items is slower. But, if we access the array items in a mathematical sequence, we can be faster straight from the second accessed item.
 
 It means that
 ```basic
@@ -365,7 +366,7 @@ is slower (just slightly) than
 ```basic
 K=X*M+Y: N=B(K): N=B(K+1)
 ```
-And it gets worse when you access the next `Y`, and the next, and the next, etc. Of course it is also true with `X`.
+And it gets worse when you access the next element, and the next, and the next, etc.
 
 ### 🍎In the code: offsets to cells
 The two most accessed arrays in the original code are named `X()` and `Y()`. They are two-dimensions arrays of dimensions (27,4) (the second dimension is oversized: 3 would have been enough -- remember that indices start at 0, a dimension of 3 is really a size of 4).
@@ -379,19 +380,21 @@ They could really have been THREE-dimension arrays with
 
 But instead the author used two-dimension arrays, the first two dimensions being "compiled" as a "piece and rotation" index (7x4 = 28). This is very wise as it is faster ! But why did the author stopped there ? We can go one step further and convert the arrays to one-dimension.
 
-In the new code, `X()` and `Y()` have thus been resized as arrays of 112 items (7x4x4). The index represents then a cell (4 cells per rotation) for a given rotation (4 rotation per piece) for a given piece (7 pieces). 
+In the new code, `X()` and `Y()` have thus been resized as arrays of 112 items (7x4x4). The index represents a cell (4 cells per rotation) for a given rotation (4 rotation per piece) for a given piece (7 pieces). 
 
 To access an item, you need a piece number (P), a rotation number (R) and a cell number (C). The index conversion formula from X(P,R,C) to X(N) is: N=Px16 + Rx4 + C.
 
-By appropriately computing starting indices and storing them in temp variables we win approximately 2000 cycles each time `X()` or `Y()` is accessed.
+By appropriately computing starting indices and storing them in temp variables we win approximately 2000 cycles each time `X()` or `Y()` is accessed. This is huge because `X()` and `Y()` are accessed 4 times (4 cells), every time the piece moves or is rotated. So we win 2000 x 4 cells x 2 arrays = 16000 cycles.
 
 ## 🍎Reading key strokes and branching accordingly
-The author decided to create an array of 128 entries, named `E()`, one for each ASCII code. The values in there are either zero (meaning the ASCII code is not used in the game) or a value from 1 to 6. These values are used for branching in a `ON GOTO` statement.
+To handle key strokes, the author decided to create an array of 128 entries (one for each ASCII code). The array is named `E()`. 
+
+The values in there are either zero (meaning the ASCII code is not used in the game) or a value from 1 to 6. These values represent one of the 6 possible actions (move left/down/right/rotate left/rotate right and quit) and are used for branching in a `ON GOTO` statement.
 
 The code itself is:
 ```basic
 100 (unrelated code, start of the main loop)
-110 K=PEEK(49152): IF K>=128 THEN POKE 49158, 0: K=K-128: GOSUB 300
+110 K=PEEK(49152): IF K>=128 THEN POKE 49168, 0: K=K-128: GOSUB 300
 190 GOTO 100
 ...
 ...
@@ -400,7 +403,7 @@ The code itself is:
 ```
 <sup>(*)In the original code, hardcoded constants are appropriately replaced with variables. I've restored the constants here for readability</sup>
 
-The first thing that is wrong here is using a `GOSUB 300` when the  `ON GOTO` could have stayed on line 110. This would have avoided a `GOSUB` (searching for line 300 from the top of the program (fortunately line 300 is the 7th line of code, so it's still rather fast) and a `RETURN`, just to to go back to line 100 from line 190. But this spaghetti code is not what interests us right now.
+The first thing that is wrong here is using a `GOSUB 300` when the  `ON GOTO` could have stayed on line 110. This would have avoided a `GOSUB` and a `RETURN`, just to to go back to line 100 from line 190. But this spaghetti code is not what interests us right now.
 
 Three things are slow here (the `PEEK(49152)` and the `POKE 49168,0` are slow but you cannot do without them):
 - `IF K>=128`, executed at every cycle
@@ -420,7 +423,7 @@ To optimize this code, at least one of those three must be removed/changed. In f
 300 ON K GOSUB 360,360,310,310,330,350,340,310,310,310,30100,30000 
 310 RETURN
 ```
-- Keys have been altered (but I could have used the original keys and still win ~1200-1500 cycles, only the `ON GOSUB` would have been longer):
+- Keys have been altered (but I could have used the original keys and still win ~1200-1500 cycles, only the `ON K GOSUB` would have been longer):
 	- F/G to rotate
 	- J/L to move left right
 	- K to move down
@@ -428,7 +431,7 @@ To optimize this code, at least one of those three must be removed/changed. In f
 	- Q to quit
 
 - `IF K>=128` has been replaced with `IF K>197` and `K=K-128` has been replaced with `K=K-197`. Now K has values from 1 to 58.
-- So we test if a key above 'E' has been pressed. By doing `ON K GOSUB`, we test `K`; 1 being when 'F' has been pressed, 2 when 'G' has been pressed ... etc... until 12 where 'Q' has been pressed. Values above 12 are ignored.
+- So we test if a key above 'E' (ASCII 197) has been pressed. By doing `ON K GOSUB`, we test `K`; 1 being when 'F' has been pressed, 2 when 'G' has been pressed ... etc... until 12 where 'Q' has been pressed. Values above 12 are ignored.
 - As keys 'H', 'I', 'M', 'N' and 'O' are not used, they go directly to line 310
 
 ### 🍎Doing it with the ASCII array,  but without the IF and the subtraction
@@ -438,7 +441,7 @@ If the author had used an array of 255 items, he could have done this:
 ```
 This is quite interesting as there's no need to test `IF K>=128` and no need to subtract 128 from `K`.
 
-This way we win around 120 cycles on the previous technique when a key is pressed (but lose around 250 cycles when there's no key press); we use a lot of memory (7x255 = 1785 bytes) for a few key presses but we can define any key we want. It's in fact the fastest technique if we want to give the user the ability to redefine keys.
+This way we win around 120 cycles on the previous technique when a key is pressed but lose around 250 cycles when there's no key press. True, we use a lot of memory (7x255 = 1785 bytes) for a few key presses but on the other hand we can define any key we want. It's in fact the fastest technique if we want to give the user the ability to redefine keys.
 
 ### 🍎The fastest way
 But I present you another technique that will allow us to win ~500 cycles when there's **no** keypress (most of the time, there's really no keypress), while still be as fast as using a 255 items array when a key is pressed (which is already 1500+ cycles faster than the original code).
@@ -454,17 +457,21 @@ The technique is the following:
 ...
 
 (somewhere)
+xxx GOSUB 3000: REM INITIALIZE ERROR HANDLER
+...
 3000 ON ERROR GOTO 3100
+3010 RETURN
+...
 3100 CALL 62248: GOTO 100
 ```
 - Again, the keys are redefined, starting from 'F' (to rotate the pieces).
-- An error can occur in line 110 when
-	- there's no keypress (PEEK(49152) is below 128)
+- An error can occur in line 110 when the result of `PEEK(49152)-197` is below zero. This will happen when
+	- there's no keypress (`PEEK(49152)` is below 128)
 	- the ASCII code of the key pressed is below 198 (any key before 'F')
-- If an error occurs it goes back to line 100 (thus even skipping line 190 which does the same)
-	- of course it means that you can't have any **other** error in your code 
-	- the error handler is in line 3100 because the `ON ERR GOTO` is in line 3000 and that the next multiple of 256 is 3072, meaning if the error handler is in 3072 or above, the `GOTO` will just go to the next line (and not from the top of the program). So this is extremely fast.
-- `CALL 62248` (or `CALL -3288`) is needed in order to fix the stack pointer after an error we want to ignore. This costs us ~1200 cycles. We could win ~1000 cycles back by replacing the `CALL 62248` with a `&` that would jump directly to that memory location. Does it still qualify as *pure Applesoft* ? I think it does as the `&` does the jump and only that. Simply write `JMP $F328` in $3F5 and it's done (in the monitor type`3F5: 4C 28 F3` or a the `]` prompt type`POKE 1013, 76: POKE 1014,40: POKE 1015,243`)
+- If an error occurs it goes back to line 3100, but from line 3000 (not from the top of the program !), then it goes directly back to line 100 (thus even skipping line 190 which does the same)	
+	- the error handler is in line 3100 because the `ON ERR GOTO` is in line 3000 and that the next multiple of 256 after 3000 is 3072, meaning if the error handler is in 3072 or above, the `GOTO` will search for the line from the next line (and not from the top of the program). So this is extremely fast.
+- of course it means that you can't have any **other** error in your code as the error handler would be triggered
+- `CALL 62248` (or `CALL -3288`) is needed in order to fix the stack pointer after an error we want to ignore. This costs us ~1200 cycles. We could win ~1000 cycles back by replacing the `CALL 62248` with a `&` that would jump directly to that memory location. Does it still qualify as *pure Applesoft* ? I think it does as activating `&` requires a jump anyway, so why not the routine in 62248 ($F328) ?. Simply write `JMP $F328` in $3F5 and it's done (in the monitor type`3F5: 4C 28 F3` or a the `]` prompt type`POKE 1013, 76: POKE 1014,40: POKE 1015,243`)
 - The `POKE 49168,0` is not on line 110 anymore, it needs to be deported in the subroutines in lines 330, 340, 350, 360 ...
 - The code could even be a little more optimized 
 	- by going back directly to line 100 when keys 'H', 'I', 'M', 'N' or 'O' are pressed.
@@ -473,19 +480,19 @@ The technique is the following:
 	- and of course by removing the spaghetti code
 
 ## 🍎Spaghetti code
-The original code is certainly one of the worst I've seen when it comes to flow. It goes in all directions: uses `GOTO`s, `GOSUB`s, nested `GOSUB`s and `GOTO`s. It is so tortuous, it looks like the logical flow comes from another language, maybe assembly.
+The original code is certainly one of the worst I've seen when it comes to flow. It goes in all directions: it uses `GOTO`s, `GOSUB`s, nested `GOSUB`s and `GOTO`s. It is so tortuous, it looks like the logical flow comes from another language, maybe assembly.
 
-`GOSUB`s (and `FN`s) are used to re-use the same code but it's really an overhead more than an advantage as the flow for the main loop can be resumed in less than 20 steps that always move forward except when it's time to loop back.
+`GOSUB`s (and `FN`s) are used to re-use the same code but it's really an overhead more than an advantage as the flow for the main loop can be resumed in less than 20 steps that always move forward except when it's time to start another cycle.
 
 1. **Check if loop delay counter has elapsed**. If it has, go to step 4 to move the piece down if possible
 2. Increase loop delay counter, **check keypress** and jump to the appropriate code if a key was pressed (step 4 to move down, step 8 and 9 to move left/right, step 10 and 11 for rotation, step 14 for quick drop)
 3. If **no key was pressed** or if key is invalid go back to step 1
-4. **Piece go down**: increase Y location, set "Down" flag
+4. **Piece go down**: increase Y location, set "moving down" flag to remember we're currently moving the piece down
 5. **Erase, check position and draw**: Erase piece and check if it can be drawn in new position (erase is needed first in order to check for pixel colors in new position) . If it is possible, draw piece in new position and go back to step 1
-6. **Piece cannot be drawn in new position**, redraw piece in previous position, if piece was going down, it means it has reached "ground", go to step 15 to check if lines have been completed.
-7. **Loop back** to step 1 if piece has not reached the ground.
-8. **Player wants to move piece to the left**, update X and go to step 5.
-9. **Player wants to move piece to the right**, update X and go to step 5.
+6. **Piece cannot be drawn in new position**, redraw piece in previous position, if piece was going down ("moving down" flag is set), it means it has reached the bottom of the pit, go to step 15 to check if lines have been completed.
+7. **Loop back** to step 1 if piece has not reached the bottom.
+8. **Player wants to move piece to the left**, decrement X and go to step 5. As the walls of the pit are not black, they're considered as obstacles and therefore we don't need to check if X is below a certain value.
+9. **Player wants to move piece to the right**, increment X and go to step 5. The same remark about X and the walls of the pit applies.
 10. **Player wants to rotate the piece clockwise**, update rotation variables accordingly and go to step 12 .
 11. **Player wants to rotate the piece counterclockwise**, update rotation variables accordingly and simply go to next step.
 12. **Check if rotation can be done**. Save offset pointers, set new offset pointers, erase piece and check if it can be drawn with new rotation. If it's possible draw the new rotation and go back to step 1
@@ -494,7 +501,7 @@ The original code is certainly one of the worst I've seen when it comes to flow.
 	- erase piece
 	- check if it can go down
 	- if it can go down, draw it and go back to step 14
-	- if it can't redraw piece in a previous position, update score if needed and go to next step
+	- if it can't go down, redraw piece in the previous position, update score if needed and go to next step
 15. **Check if lines have been completed**. If not and if we're not at the top of the screen go to step 17. If we're at the top of the screen then it's game over else continue to next step
 16. **Lines have been completed**. Erase completed lines, move stack of pieces down, update score and go to next step
 17. **Need a new piece** Randomly pick a new piece, set the offset pointers, draw the piece on top of the screen, go back to step 1
@@ -519,3 +526,10 @@ These concern only the main game loop:
 	- `IF A OR B THEN` is slower than `IF A+B THEN`
 - All `IF N=0 THEN` have been replaced with `IF NOT N THEN`.
 - I've tried to stuff as many instructions on a line as possible using colons whenever possible. It's only 57 cycles to move to the next line but if there's not a good reason, that's 57 cycles wasted.
+
+## 🍎Final code
+I have added an intro screen with instructions and also the possibility to select a level of difficulty and even if you want some additional obstacles.
+
+So here's the full code: [htc2_tetris.bas](htc2_tetris.bas) and the [DSK file](htc2_tetris.dsk) file if you want to try the game.
+
+I hope you'll enjoy it and that this article helped you understand how to optimize your code.
