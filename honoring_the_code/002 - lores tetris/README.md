@@ -1,6 +1,21 @@
 # Honoring The Code, part 2: Applesoft Tetris in Lo-Res
 # Summary
-
+- [Discovering the game](#discovering-the-game)
+- [Reviewing what's wrong](#reviewing-whats-wrong)
+- [Fixing the main bottleneck](#fixing-the-main-bottleneck)
+	- [PLOT two pixels with one instruction](#plot-two-pixels-with-one-instruction)
+	- [PLOT 8 pixels with one instruction](#plot-8-pixels-with-one-instruction)
+	- [Are we fast enough ?](#are-we-fast-enough-)
+	- [A small setback](#a-small-setback)
+	- [Final PRINT optimizations](#final-print-optimizations)
+- [Optimizing arrays](#optimizing-arrays)
+	- [In the code: offsets to cells](#in-the-code-offsets-to-cells)
+- [Reading key strokes and branching accordingly](#reading-key-strokes-and-branching-accordingly)
+	- [Doing it without the ASCII array](#doing-it-without-the-ascii-array)
+	- [Doing it with the ASCII array, but without the IF and the subtraction](#doing-it-with-the-ascii-array--but-without-the-if-and-the-subtraction)
+	- [The fastest way](#the-fastest-way)
+- [Spaghetti code](#spaghetti-code)
+- [Little optimizations](#little-optimizations)
 
 
 ## 🍎Discovering the game
