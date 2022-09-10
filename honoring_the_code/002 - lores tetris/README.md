@@ -261,6 +261,8 @@ VTAB 10:HTAB 10: PRINT "L" + CHR$(10) + CHR$(8) + "L" + CHR$(10) + CHR$(8) + "LL
 ```
 This will draw a green L on the lo-res screen ! 
 
+![L in lores](img/capture4.png)
+
 Now all we need to do is create a string array with all the possible rotations of every piece. Seven pieces with 4 rotations each is an array of 28 strings. `DIM A$(28)` will do.
 
 We also need to know what value we need to POKE into memory 50, so each piece will have an inverse flag value, again in an array. `DIM C(6)` will work.
