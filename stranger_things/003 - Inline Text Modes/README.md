@@ -37,7 +37,7 @@ In `$FDED` is the monitor routine named `COUT`. Its role is to handle the output
 We have this:
 ```Assembly
 FDED: 6C 36 00		COUT	JMP (CSWL)	; jump to location referenced by $36-$37
-FDF0: 48			COUT1	PHA			; normal monitor character output routine starts here
+FDF0: 48		COUT1	PHA			; normal monitor character output routine starts here
 FDF1: ...
 ```
 So, what we need to do is write in CSWL (zero page $36) and CSWH (zero page $37) the address where we want to handle the character output.
@@ -125,14 +125,14 @@ We also want to initialize a flag stating that the "Peculiar mode" is not set ye
 So the code begins with:
 
 ```Assembly
-300: A9 03			INIT			LDA #>START				
-302: 85 37							STA CSWH
-304: A9 0D							LDA #<START
-306: 85 36							STA CSWL
-308: A9 00							LDA #$00				; SET PECULIAR_MODE FLAG TO ZERO
-30A: 85 34							STA PECULIAR_MODE
-30C: 60								RTS
-30D					START
+300: A9 03	INIT		LDA #>START				
+302: 85 37			STA CSWH
+304: A9 0D			LDA #<START
+306: 85 36			STA CSWL
+308: A9 00			LDA #$00				; SET PECULIAR_MODE FLAG TO ZERO
+30A: 85 34			STA PECULIAR_MODE
+30C: 60				RTS
+30D		START
 ```
 Nothing too complicated so far, I think. All we'd have to do is `CALL 768` to initialize the new feature and then any character to be displayed would be handled by our routine in `$30D`.
 
@@ -151,39 +151,39 @@ Then we are going to verify the value in `A`:
 
 Here's the code so far:
 ```Assembly
-30D: 86 35			START			STX YSAV1				; SAVE X IN YSAV1
-30F: 48								PHA						; SAVE A ON STACK
+30D: 86 35	START		STX YSAV1		; SAVE X IN YSAV1
+30F: 48				PHA			; SAVE A ON STACK
 
-310: C9 90			CHK_CTRL_P		CMP #$90				; IS A = CTRL-P ? (ASCII $10 + $80)
-312: D0 04							BNE CHK_CTRL_F			; NO, CHECK CTRL-F
-314: A2 FF							LDX #$FF				; YES, PREPARE THE VALUE TO SET PECULIAR MODE ON
-316: D0 1B							BNE OUT					; THIS BRANCHES ALWAYS BECAUSE X IS NOT ZERO
+310: C9 90	CHK_CTRL_P	CMP #$90		; IS A = CTRL-P ? (ASCII $10 + $80)
+312: D0 04			BNE CHK_CTRL_F		; NO, CHECK CTRL-F
+314: A2 FF			LDX #$FF		; YES, PREPARE THE VALUE TO SET PECULIAR MODE ON
+316: D0 1B			BNE OUT			; THIS BRANCHES ALWAYS BECAUSE X IS NOT ZERO
 
-318: C9 86			CHK_CTRL_F		CMP #$86				; IS A = CTRL-F ? (ASCII $06 + $80)
-31A: D0 07							BNE CHK_CTRL_O			; NO, CHECK CTRL-O
-31C: 20 80 F2						JSR FLASH				; SET FLASH MODE, RETURNS WITH X=$40
-31F: A2 00							LDX #$00				; SET X=0, PREPARE VALUE FOR PECULIAR MODE
-321: F0 10							BEQ OUT					; ALWAYS TAKEN
+318: C9 86	CHK_CTRL_F	CMP #$86		; IS A = CTRL-F ? (ASCII $06 + $80)
+31A: D0 07			BNE CHK_CTRL_O		; NO, CHECK CTRL-O
+31C: 20 80 F2			JSR FLASH		; SET FLASH MODE, RETURNS WITH X=$40
+31F: A2 00			LDX #$00		; SET X=0, PREPARE VALUE FOR PECULIAR MODE
+321: F0 10			BEQ OUT			; ALWAYS TAKEN
 
-323: C9 8F			CHK_CTRL_O		CMP #$8F				; IS A = CTRL-O ? (ASCII $0F + $80)
-325: D0 05							BNE CHK_CTRL_N			; NO, CHECK CTRL-N
-327: 20 77 F2						JSR INVERSE				; SET INVERSE MODE, RETURNS WITH X=0
-32A: F0 07							BEQ OUT					; ALWAYS TAKEN
+323: C9 8F	CHK_CTRL_O	CMP #$8F		; IS A = CTRL-O ? (ASCII $0F + $80)
+325: D0 05			BNE CHK_CTRL_N		; NO, CHECK CTRL-N
+327: 20 77 F2			JSR INVERSE		; SET INVERSE MODE, RETURNS WITH X=0
+32A: F0 07			BEQ OUT			; ALWAYS TAKEN
 
-32C: C9 8E			CHK_CTRL_N		CMP #$8E				; IS A = CTRL-N ? (ASCII $0E + $80)
-32E: D0 0B							BNE CHK_P_MODE			; NO, CHECK PECULIAR MODE
-330: 20 73 F2						JSR NORMAL				; SET NORMAL MODE, RETURNS WITH X=0
+32C: C9 8E	CHK_CTRL_N	CMP #$8E		; IS A = CTRL-N ? (ASCII $0E + $80)
+32E: D0 0B			BNE CHK_P_MODE		; NO, CHECK PECULIAR MODE
+330: 20 73 F2			JSR NORMAL		; SET NORMAL MODE, RETURNS WITH X=0
 
-333: 86 34			OUT				STX PECULIAR_MODE		; SET PECULIAR MODE WITH VALUE IN X
-335: 68				OUT0			PLA						; RESTORE A
-336: A6 35			OUT1			LDX YSAV1				; RESTORE X
-337: 4C F0 FD						JMP COUT1				; DISPLAY THE CHARACTER IF POSSIBLE
+333: 86 34	OUT		STX PECULIAR_MODE	; SET PECULIAR MODE WITH VALUE IN X
+335: 68		OUT0		PLA			; RESTORE A
+336: A6 35	OUT1		LDX YSAV1		; RESTORE X
+337: 4C F0 FD			JMP COUT1		; DISPLAY THE CHARACTER IF POSSIBLE
 
-33B: A6 34			CHK_P_MODE		LDX PECULIAR_MODE		; LOAD PECULIAR MODE FLAG IN X
-33D: E0 FF							CPX #$FF				; IS THE FLAG SET ?
-33F: D0 F4							BNE OUT0				; IF NOT, OUTPUT THE CHARACTER
+33B: A6 34	CHK_P_MODE	LDX PECULIAR_MODE	; LOAD PECULIAR MODE FLAG IN X
+33D: E0 FF			CPX #$FF		; IS THE FLAG SET ?
+33F: D0 F4			BNE OUT0		; IF NOT, OUTPUT THE CHARACTER
 
-341:				P_MODE
+341:		P_MODE
 ```
 
 Now the only thing left to do is handle the "Peculiar mode". Because this mode is meant to be used with PRINT and PRINT only (while showing the lores screen), we need to check first if we're busy PRINTing text or if we're doing something else like LIST for instance. If the command was LIST, we don't want to display weird characters. For example all the space characters (value 32) would be replaced with @ (value zero).
@@ -200,26 +200,26 @@ The small setback is that this routine uses Y. So far we have not used Y. We hav
 
 Here goes:
 ```Assembly
-341: BA				P_MODE			TSX						; GET STACK POINTER TO X
-342: BD 05 01						LDA STACK+5,X			; GET MSB OF THE RETURN ADDRESS
-345: C9 DB							CMP #$DB				; IS IT FROM PRINT IN $DB49 ?
-347: D0 EC							BNE OUT0				; NO, LET'S CALL COUT1 THEN
+341: BA		P_MODE		TSX			; GET STACK POINTER TO X
+342: BD 05 01			LDA STACK+5,X		; GET MSB OF THE RETURN ADDRESS
+345: C9 DB			CMP #$DB		; IS IT FROM PRINT IN $DB49 ?
+347: D0 EC			BNE OUT0		; NO, LET'S CALL COUT1 THEN
 
-349: 68								PLA						; GET CHARACTER VALUE BACK FROM STACK
-34A: C9 A0							CMP #$A0				; IS IT A CONTROL CHAR (<160)
-34C: 90 E8							BCC OUT1				; YES, LET'S CALL COUT1 THEN
+349: 68				PLA			; GET CHARACTER VALUE BACK FROM STACK
+34A: C9 A0			CMP #$A0		; IS IT A CONTROL CHAR (<160)
+34C: 90 E8			BCC OUT1		; YES, LET'S CALL COUT1 THEN
 
-34E: AA								TAX						; SAVE CHAR IN X
-34F: 98								TYA						; SAVE Y IN A
-350: 48								PHA						; STORE VALUE OF Y ON STACK
-351: 8A								TXA						; GET BACK CHAR FROM X
-352: 29 9F							AND #$9F				; CLEAR BITS 5 & 6, RANGE IS NOW $80-$9F
-354: 20 F0 FB						JSR STORADV				; FORCE DISPLAY OF CHAR
-357: 68								PLA						; RESTORE VALUE OF Y FROM STACK
-358: A8								TAY						; BACK TO Y
-359: 8A								TXA						; RESTORE A FROM X
-35A: A6 35							LDX YSAV1				; RESTORE X FROM YSAV1
-35C: 60								RTS						; RETURN TO CALLER
+34E: AA				TAX			; SAVE CHAR IN X
+34F: 98				TYA			; SAVE Y IN A
+350: 48				PHA			; STORE VALUE OF Y ON STACK
+351: 8A				TXA			; GET BACK CHAR FROM X
+352: 29 9F			AND #$9F		; CLEAR BITS 5 & 6, RANGE IS NOW $80-$9F
+354: 20 F0 FB			JSR STORADV		; FORCE DISPLAY OF CHAR
+357: 68				PLA			; RESTORE VALUE OF Y FROM STACK
+358: A8				TAY			; BACK TO Y
+359: 8A				TXA			; RESTORE A FROM X
+35A: A6 35			LDX YSAV1		; RESTORE X FROM YSAV1
+35C: 60				RTS			; RETURN TO CALLER
 ```
 
 
