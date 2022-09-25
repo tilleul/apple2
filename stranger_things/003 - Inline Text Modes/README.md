@@ -101,6 +101,9 @@ Now let us do the same but without `PRINT`:
 TEXT: HOME
 POKE 1024,1 : POKE 1025, 65: POKE 1026, 129: POKE 1027, 193
 ```
+
+![POKE multiples A](img/poke_a.png)
+
 Well ! It looks like we can store values of 128 to 159 on the screen memory even though we cannot PRINT those control-characters.
 
 ## Why print control-characters ?
