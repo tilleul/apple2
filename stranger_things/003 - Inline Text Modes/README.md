@@ -123,7 +123,7 @@ You've just drawn the word "HELLO" the fastest possible way with Applesoft only.
 
 The problem now is that to `PRINT`/draw all possible combinations of colors you need to be able to `PRINT` all 255 possible values of bytes, including those between 128 to 159, that is the control-characters. 
 
-As print is super-fast compared to `PLOT` (or `HLIN` and `VLIN`), this could be used to display sprites on the lores screen.
+As `PRINT` is super-fast compared to `PLOT` (or `HLIN` and `VLIN`), this could be used to display sprites on the lores screen faster than ever with Applesoft.
 
 And since what we want to do is use combinations of CTRL-characters to change the text mode **within** strings, we could draw any shape and store the `INVERSE`/`FLASH`/`NORMAL`/`SPECIAL` statements within the string itself !
 
@@ -132,7 +132,7 @@ The routine will be simple and short, so we can store it in $300. But if you wan
 
 The first thing we want to do is initialize CSWL/CSWH (and thus activate our routine). To do that we can begin in $300 with a simple init routine that needs to be called at the start of your Applesoft program (or at least before you want to take advantage of the new feature).
 
-We also want to initialize a flag stating that the "Peculiar mode" is not set yet. The Peculiar mode is that new mode where we allow to print control-characters. I decided that this flag would be stored in zero page $34. This memory location is normally used by the monitor (it is known as `YSAV`) to store temp data but I estimated that there would be no interest in being in the monitor AND want to print control-characters on the lores screen. As this is the only zero page location that I need, I wanted to avoid any of the usual "free" zero pages locations to make sure I don't interfere with possibly other programs that might use these "free" locations.
+We also want to initialize a flag stating that the "Peculiar mode" is not set yet. The "Peculiar mode" is that new mode where we allow to print control-characters. I decided that this flag would be stored in zero page $34. This memory location is normally used by the monitor (it is known as `YSAV`) to store temp data but I estimated that there would be no interest in being in the monitor AND want to print control-characters on the lores screen. As this is the only zero page location that I need, I wanted to avoid any of the usual "free" zero pages locations to make sure I don't interfere with possibly other programs that might use these "free" locations.
 
 So the code begins with:
 
@@ -155,8 +155,8 @@ So the first thing we will do is save the values of `A` and `X`. Why these two ?
 We will save `A` on the stack and `X` in a zero page location named `YSAV1` (in `$35`). This location is used by `COUT1` to save the value in `Y` and restore it when leaving. It's not used elsewhere meaning we can use it for the same purpose (except we're going to save `X`) until we actually call `COUT1`.
 
 Then we are going to verify the value in `A`:
-- if it's CTRL-P then we set the "Peculiar mode" flag on (by writing $FF in it), restore A and X and call `COUT1`
-- if it's CTRL-F then we call the `FLASH` routine in `$F280`, this modifies `A` and `X` registers (X being now $40, the value of the FLASH-mask), we clear `X` and use `X` to reset the "Peculiar mode" flag, we restore `A` and `X` and call `COUT1`
+- if it's CTRL-P then we set the "Peculiar mode" flag on (by writing $FF in it, the important thing being that the hi-bit is set), restore `A` and `X` and call `COUT1`
+- if it's CTRL-F then we call the `FLASH` routine in `$F280`, this modifies `A` and `X` registers (`X` being now $40, the value of the FLASH-mask), we clear `X` and use `X` to reset the "Peculiar mode" flag, we restore `A` and `X` and call `COUT1`
 - if it's CTRL-O then we call the `INVERSE` routine in `$F277`, this again modifies `A` and `X` but `X` is now zero. We use `X` to reset the "Peculiar mode" flag, we restore `A` and `X` and call `COUT1`
 - if it's CTRL-N then we call the `NORMAL` routine in  `$F273`. Just like the `INVERSE` routine, this modifies `A` and `X` and `X` is now zero. Again, we use `X` to reset the "Peculiar mode" flag, we restore `A` and `X` and call `COUT1`
 - if it's any other character, then we check the "Peculiar mode" flag. If it's off, we call `COUT1`. If it's on then we need to modify the value of `A` so it fits within $80-$9F. More about that in a moment.
@@ -192,10 +192,9 @@ Here's the code so far:
 337: 4C F0 FD			JMP COUT1		; DISPLAY THE CHARACTER IF POSSIBLE
 
 33B: A6 34	CHK_P_MODE	LDX PECULIAR_MODE	; LOAD PECULIAR MODE FLAG IN X
-33D: E0 FF			CPX #$FF		; IS THE FLAG SET ?
-33F: D0 F4			BNE OUT0		; IF NOT, OUTPUT THE CHARACTER
+33D: 10 F6			BPL OUT0		; IF HIBIT NOT SET, THEN NOT IN P-MODE, OUTPUT THE CHARACTER
 
-341:		P_MODE
+33F:		P_MODE
 ```
 
 Now the only thing left to do is handle the "Peculiar mode". Because this mode is meant to be used with `PRINT` and `PRINT` only (while showing the lores screen), we need to check first if we're busy `PRINT`ing text or if we're doing something else like `LIST` for instance. If the command was `LIST`, we don't want to display weird characters. For example all the space characters (value 32) would be replaced with @ (value zero).
@@ -204,7 +203,7 @@ The way I've found to detect if we're `PRINT`ing something is to check the stack
 
 So, if our routine was indirectly called from Applesoft, the stack (from the last stacked value) looks like this: `66 DB 4B DB`. 
 
-`$DB66`(+1) is the return address to `OUTDO`, while `$DB4B`(+1) is the return address from the `PRINT` command. The interesting byte in the stack is the 4th. This byte will **never** be `$DB` if our routine comes from anything else but `PRINT`. So, we just need to check the value of the 4th byte. Well, in fact the **5th** byte, because our own routine adds the value of `A` to the stack.
+`$DB66`(+1) is the return address to `OUTDO`, while `$DB4B`(+1) is the return address from the `PRINT` command. The interesting byte in the stack is the 3rd. We can assume this byte will **never** be `$4B` if our routine comes from anything else but `PRINT`. So, we just need to check the value of the 3rd byte. Well, in fact the **4th** byte, because our own routine adds the value of `A` to the stack.
 
 So if we were not `PRINT`ing, we simply ignore the Peculiar mode and call `COUT1`. But if we're `PRINT`ing we do a bit more work.
 
@@ -214,26 +213,26 @@ The small setback is that this routine uses `Y`. So far we have not used `Y`. We
 
 Here goes:
 ```Assembly
-341: BA		P_MODE		TSX			; GET STACK POINTER TO X
-342: BD 05 01			LDA STACK+5,X		; GET MSB OF THE RETURN ADDRESS
-345: C9 DB			CMP #$DB		; IS IT FROM PRINT IN $DB49 ?
-347: D0 EC			BNE OUT0		; NO, LET'S CALL COUT1 THEN
+33F: BA		P_MODE		TSX			; GET STACK POINTER TO X
+340: BD 05 01			LDA STACK+5,X		; GET MSB OF THE RETURN ADDRESS
+343: C9 DB			CMP #$DB		; IS IT FROM PRINT IN $DB49 ?
+345: D0 EC			BNE OUT0		; NO, LET'S CALL COUT1 THEN
 
-349: 68				PLA			; GET CHARACTER VALUE BACK FROM STACK
-34A: C9 A0			CMP #$A0		; IS IT A CONTROL CHAR (<160)
-34C: 90 E8			BCC OUT1		; YES, LET'S CALL COUT1 THEN
+347: 68				PLA			; GET CHARACTER VALUE BACK FROM STACK
+348: C9 A0			CMP #$A0		; IS IT A CONTROL CHAR (<160)
+34A: 90 E8			BCC OUT1		; YES, LET'S CALL COUT1 THEN
 
-34E: AA				TAX			; SAVE CHAR IN X
-34F: 98				TYA			; SAVE Y IN A
-350: 48				PHA			; STORE VALUE OF Y ON STACK
-351: 8A				TXA			; GET BACK CHAR FROM X
-352: 29 9F			AND #$9F		; CLEAR BITS 5 & 6, RANGE IS NOW $80-$9F
-354: 20 F0 FB			JSR STORADV		; FORCE DISPLAY OF CHAR
-357: 68				PLA			; RESTORE VALUE OF Y FROM STACK
-358: A8				TAY			; BACK TO Y
-359: 8A				TXA			; RESTORE A FROM X
-35A: A6 35			LDX YSAV1		; RESTORE X FROM YSAV1
-35C: 60				RTS			; RETURN TO CALLER
+34C: AA				TAX			; SAVE CHAR IN X
+34D: 98				TYA			; SAVE Y IN A
+34E: 48				PHA			; STORE VALUE OF Y ON STACK
+34F: 8A				TXA			; GET BACK CHAR FROM X
+350: 29 9F			AND #$9F		; CLEAR BITS 5 & 6, RANGE IS NOW $80-$9F
+352: 20 F0 FB			JSR STORADV		; FORCE DISPLAY OF CHAR
+355: 68				PLA			; RESTORE VALUE OF Y FROM STACK
+356: A8				TAY			; BACK TO Y
+357: 8A				TXA			; RESTORE A FROM X
+358: A6 35			LDX YSAV1		; RESTORE X FROM YSAV1
+35A: 60				RTS			; RETURN TO CALLER
 ```
 
 And here's the full code:
@@ -245,11 +244,11 @@ And here's the full code:
 320: 00 F0 10 C9 8F D0 05 20
 328: 77 F2 F0 07 C9 8E D0 0B
 330: 20 73 F2 86 34 68 A6 35
-338: 4C F0 FD A6 34 E0 FF D0
-340: F4 BA BD 05 01 C9 DB D0
-348: EC 68 C9 A0 90 E8 AA 98
-350: 48 8A 29 9F 20 F0 FB 68
-358: A8 8A A6 35 60
+338: 4C F0 FD A6 34 10 F6 BA 
+340: BD 04 01 C9 4B D0 EE 68
+348: C9 A0 90 EA AA 98 48 8A
+350: 29 9F 20 F0 FB 68 A8 8A
+358: A6 35 60
 ```
 ## Disabling the OS
 In order to activate the feature, a simple `CALL 768` is enough. But before anything, you must disable DOS (or PRODOS).
