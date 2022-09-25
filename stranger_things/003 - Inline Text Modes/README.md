@@ -107,7 +107,7 @@ POKE 1024,1 : POKE 1025, 65: POKE 1026, 129: POKE 1027, 193
 Well ! It looks like we can store values of 128 to 159 on the screen memory even though we cannot PRINT those control-characters.
 
 ## Why print control-characters ?
-Let's admit it, at first sight, there's absolutely no interest in printing control-characters. After all, these characters are designed to be invisible: they're used in communications protocols or to move the cursor, etc. What's more they just look like normal characters when you POKE them in screen memory.
+Let's admit it, at first sight, there's absolutely no interest in printing control-characters. After all, these characters are designed to be invisible: they're used in communications protocols or to move the cursor, etc. What's more they just look like normal characters when you `POKE` them in screen memory.
 
 Well, there's one minor interest though. The text area memory is in $400-$7FF. And this area is shared with the lo-res display. It means we can use `PRINT` to `PLOT` on the lores screen. `PRINT`ing one character actually draws two contiguous vertical lores pixels.
 
@@ -116,7 +116,10 @@ For instance, type the following:
 GR
 INVERSE: VTAB 1: PRINT "Q@Q@QAA@Q@@@Q@@@QAQ": PRINT "QAQ@QA@@Q@@@Q@@@Q@Q": PRINT "A@A@AAA@AAA@AAA@AAA": NORMAL: VTAB 22
 ```
-You've just drawn the word "HELLO" tthe fastest possible way with Applesoft only. 
+
+![Hello in lores](img/hello.png)
+
+You've just drawn the word "HELLO" the fastest possible way with Applesoft only. 
 
 The problem now is that to `PRINT`/draw all possible combinations of colors you need to be able to `PRINT` all 255 possible values of bytes, including those between 128 to 159, that is the control-characters. 
 
