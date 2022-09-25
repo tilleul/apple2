@@ -1,8 +1,9 @@
-**STRANGER THINGS ABOUT YOUR APPLE II, part 2**
-
+# STRANGER THINGS ABOUT YOUR APPLE II, part 3
 An A2SE series about things you did not know about your Apple II or maybe simply forgot.
 
-Today, we're going to discover how you can
+# Part 3: Inline Text Modes
+
+In this article we're going to discover how you can
 - integrate `FLASH`/`INVERSE`/`NORMAL` commands within strings and strings variables
 - display `FLASH`/`INVERSE` characters in listings
 - `PRINT` normally unprintable control-characters in order to plot brown and orange pixels on the lores screen (wtf ?)
@@ -143,11 +144,11 @@ So the first thing we will do is save the values of `A` and `X`. Why these two ?
 We will save `A` on the stack and `X` in a zero page location named `YSAV1` (in `$35`). This location is used by `COUT1` to save the value in `Y` and restore it when leaving. It's not used elsewhere meaning we can use it for the same purpose (except we're going to save `X`) until we actually call `COUT1`.
 
 Then we are going to verify the value in `A`:
-- if it's CTRL-P then we set the "Peculiar mode" flag on (by writing $FF in it), restore A and X and call COUT1
-- if it's CTRL-F then we call the FLASH routine in $F280, this modifies A and X registers (X being now $40, the value of the FLASH-mask), we clear X and use X to reset the "Peculiar mode" flag, we restore A and X and call COUT1
-- if it's CTRL-O then we call the INVERSE routine in $F277, this again modifies A and X but X is now zero. We use X to reset the "Peculiar mode" flag, we restore A and X and call COUT1
-- if it's CTRL-N then we call the NORMAL routine in  $F273. Just like the INVERSE routine, this modifies A and X and X is now zero. Again, we use X to reset the "Peculiar mode" flag, we restore A and X and call COUT1
-- if it's any other character, then we check the "Peculiar mode" flag. If it's off, we call COUT1. If it's on then we need to modify the value of A so it fits within $80-$9F. More about that in a moment.
+- if it's CTRL-P then we set the "Peculiar mode" flag on (by writing $FF in it), restore A and X and call `COUT1`
+- if it's CTRL-F then we call the `FLASH` routine in `$F280`, this modifies `A` and `X` registers (X being now $40, the value of the FLASH-mask), we clear `X` and use `X` to reset the "Peculiar mode" flag, we restore `A` and `X` and call `COUT1`
+- if it's CTRL-O then we call the `INVERSE` routine in `$F277`, this again modifies `A` and `X` but `X` is now zero. We use `X` to reset the "Peculiar mode" flag, we restore `A` and `X` and call `COUT1`
+- if it's CTRL-N then we call the `NORMAL` routine in  `$F273`. Just like the `INVERSE` routine, this modifies `A` and `X` and `X` is now zero. Again, we use `X` to reset the "Peculiar mode" flag, we restore `A` and `X` and call `COUT1`
+- if it's any other character, then we check the "Peculiar mode" flag. If it's off, we call `COUT1`. If it's on then we need to modify the value of `A` so it fits within $80-$9F. More about that in a moment.
 
 Here's the code so far:
 ```Assembly
@@ -186,17 +187,19 @@ Here's the code so far:
 341:		P_MODE
 ```
 
-Now the only thing left to do is handle the "Peculiar mode". Because this mode is meant to be used with PRINT and PRINT only (while showing the lores screen), we need to check first if we're busy PRINTing text or if we're doing something else like LIST for instance. If the command was LIST, we don't want to display weird characters. For example all the space characters (value 32) would be replaced with @ (value zero).
+Now the only thing left to do is handle the "Peculiar mode". Because this mode is meant to be used with `PRINT` and `PRINT` only (while showing the lores screen), we need to check first if we're busy `PRINT`ing text or if we're doing something else like `LIST` for instance. If the command was `LIST`, we don't want to display weird characters. For example all the space characters (value 32) would be replaced with @ (value zero).
 
-The way I've found to detect if we're PRINTing something is to check the stack for a return address that would go back somewhere in Applesoft PRINT routine. That somewhere is $DB4C (or more exactly $DB4B as it would be stored on the stack). This is the return address after a call to a subroutine named OUTDO in $DB5C that actually calls COUT in $DB64.
+The way I've found to detect if we're `PRINT`ing something is to check the stack for a return address that would go back somewhere in Applesoft `PRINT` routine. That somewhere is `$DB4C` (or more exactly `$DB4B` as it would be stored on the stack). This is the return address after a call to a subroutine named `OUTDO` in `$DB5C` that actually calls `COUT` in `$DB64`.
 
-So, if our routine was indirectly called from Applesoft, the stack (from the last stacked value) looks like this: `66 DB 4B DB`. $DB66(+1) is the return address to OUTDO, while $DB4B(+1) is the return address from the PRINT command. The interesting byte in the stack is the 4th. This byte will **never** be $DB if our routine comes from anything else but PRINT. So, we just need to check the value of the 4th byte. Well, in fact the **5th** byte, because our own routine adds the value of `A` to the stack.
+So, if our routine was indirectly called from Applesoft, the stack (from the last stacked value) looks like this: `66 DB 4B DB`. 
 
-So if we were not PRINTing, we simply ignore the Peculiar mode and call COUT1. But if we're PRINTing we do a bit more work.
+`$DB66`(+1) is the return address to `OUTDO`, while `$DB4B`(+1) is the return address from the `PRINT` command. The interesting byte in the stack is the 4th. This byte will **never** be `$DB` if our routine comes from anything else but `PRINT`. So, we just need to check the value of the 4th byte. Well, in fact the **5th** byte, because our own routine adds the value of `A` to the stack.
 
-First we check if the character we need to print is a CTRL character. If it is, again, we just send it to COUT1. But if it's not we need to modify the character to print so that it goes into the $80-$9F range. In order to do that, we simply clear the 5th and 6th bit of the character. Then we call a routine that is part of COUT1 but that is called usually when then character is **not** in the $80-$9F range. This routine is named STORADV (in $FBF0) and is responsible for writing the value of A at the appropriate location in the sreen memory area and update the cursor position and scroll the text window if needed.
+So if we were not `PRINT`ing, we simply ignore the Peculiar mode and call `COUT1`. But if we're `PRINT`ing we do a bit more work.
 
-The small setback is that this routine uses Y. So far we have not used Y. We haven't even saved Y. Thus we need to save Y before calling STORADV, then restore it, restore A and X too and return to the caller. This is a trivial case of juggling with the available registers.
+First we check if the character we need to print is a CTRL character. If it is, again, we just send it to `COUT1`. But if it's not we need to modify the character to print so that it goes into the $80-$9F range. In order to do that, we simply clear the 5th and 6th bit of the character. Then we call a routine that is part of `COUT1` but that is called usually when then character is **not** in the $80-$9F range. This routine is named `STORADV` (in `$FBF0`) and is responsible for writing the value of `A` at the appropriate location in the screen memory area and update the cursor position and scroll the text window if needed.
+
+The small setback is that this routine uses `Y`. So far we have not used `Y`. We haven't even saved `Y`. Thus we need to save `Y` before calling `STORADV`, then restore it, restore `A` and `X` too and return to the caller. This is a trivial case of juggling with the available registers.
 
 Here goes:
 ```Assembly
@@ -222,4 +225,31 @@ Here goes:
 35C: 60				RTS			; RETURN TO CALLER
 ```
 
+And here's the full code:
+```Assembly
+300: A9 03 85 37 A9 0D 85 36
+308: A9 00 85 34 60 86 35 48
+310: C9 90 D0 04 A2 FF D0 1B
+318: C9 86 D0 07 20 80 F2 A2
+320: 00 F0 10 C9 8F D0 05 20
+328: 77 F2 F0 07 C9 8E D0 0B
+330: 20 73 F2 86 34 68 A6 35
+338: 4C F0 FD A6 34 E0 FF D0
+340: F4 BA BD 05 01 C9 DB D0
+348: EC 68 C9 A0 90 E8 AA 98
+350: 48 8A 29 9F 20 F0 FB 68
+358: A8 8A A6 35 60
+```
+## Disabling the OS
+In order to activate the feature, a simple `CALL 768` is enough. But before anything, you must disable DOS (or PRODOS).
 
+What's that ? DOS/ProDOS use the CSW output redirection vector in order to handle their own features. Without going into details, this is (among other features) how DOS/ProDOS intercepts CTRL-D within `PRINT` commands in order to manipulate files on disk from an Applesoft program.
+
+DOS/ProDOS makes sure that CSW will redirect output to their routines. To prevent that, we need to disconnect DOS/ProDOS. And when we need DOS/ProDOS back we need to be able to reconnect DOS/ProDOS.
+
+DOS can be disconnected with a `CALL 40672` and reconnected with `CALL 43089`.
+
+But there's a more universal method that is common to both DOS and ProDOS. It's as easy as POKEing values in CSW and KSW. But this has to be done in one shot in four consecutive `POKE`s within a program.
+`POKE 54,240: POKE 55,253: POKE 56,27: POKE 57,253` unhooks DOS/ProDOS and restores CSW/KSW to their original values.
+
+To restore DOS/ProDOS, as they use different CSW/KSW values, it's best to simply do a `CALL 976` (`$3D0`). or a `CALL 1002` (`$3EA`).
