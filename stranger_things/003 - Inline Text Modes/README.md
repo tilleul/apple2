@@ -28,7 +28,7 @@ PRINT "YOU WIN "; : INVERSE : PRINT "10"; : NORMAL : PRINT " POINTS !"
 ![Normal and Inverse](img/normal_inverse.png)
 
 ## Integrating text modes within strings
-This is something that's possible on several 8-bit computers but not on the Apple II, except if you have a 80-column card. In this case, **and** if the card is active, you can use CTRL-O and CTRL-N to instruct the computer than the following characters are respectively in `INVERSE` or `NORMAL` modes. There's no CTRL code for the `FLASH` mode though as the 80 column cannot display `FLASH` characters.
+This is something that's possible on several 8-bit computers but not on the Apple II, except if you have a 80-column card. In this case, **and** if the card is active, you can use CTRL-O and CTRL-N to instruct the computer that the following characters are respectively in `INVERSE` or `NORMAL` modes. There's no CTRL code for the `FLASH` mode though, as the 80 column cannot display `FLASH` characters.
 
 We are going to do exactly the same but without the need for a 80-column card and we will add a CTRL code for the `FLASH` mode too !
 
@@ -41,7 +41,7 @@ In `$FDED` is the monitor routine named `COUT`. Its role is to handle the output
 We have this:
 ```Assembly
 FDED: 6C 36 00		COUT	JMP (CSWL)	; jump to location referenced by $36-$37
-FDF0: 48		COUT1	PHA			; normal monitor character output routine starts here
+FDF0: 48		COUT1	PHA		; normal monitor character output routine starts here
 FDF1: ...
 ```
 So, what we need to do is write in CSWL (zero page $36) and CSWH (zero page $37) the address where we want to handle the character output.
@@ -51,27 +51,27 @@ There, we check if the character that must be output is one of the CTRL characte
 But remember I also want to print normally unprintable control-characters.
 
 ## How Applesoft and the monitor work together.
-When you type a character on the Apple II keyboard, the character that's been typed is retrievable in `$C000` (decimal `-16384` or `49152` ... that's why you do `K=PEEK(49152)` when you want to identify which key was pressed). You also know that this character is a byte, and corresponds to the ASCII code of the character **plus 128** because the hi-bit of the byte is set.
+When you type a character on the Apple II keyboard, the character that's been typed is retrievable in `$C000` (decimal `-16384` or `49152` ... that's why you do `K=PEEK(49152)` when you want to identify which key was pressed). You also know that this character is a byte, and that it corresponds to the ASCII code of the character **plus 128** because the hi-bit of the byte is set. This value, if the character is meant to be printed on screen, is sent to `COUT`.
 
-Thus, `COUT` expects a byte with a value above 127.
+Thus, `COUT` expects a byte with a value above 127. Let's see what happens with Applesoft.
 
-In Applesoft, a program is stored in memory as a combination of tokenized instructions and ASCII characters. The Applesoft tokens are single bytes that represent a single instruction (for example, the token for `PRINT` is $BA, decimal 186). Tokens have values above 127, while the ASCII characters are below 128. As `COUT` expects bytes with values above 127, Applesoft adds 128 to the value of the byte before calling COUT (more precisely, Applesoft applies an ORA-mask on the byte value, forcing the hi-bit to turn on). 
+There are not many routines in Applesoft that output characters. We have `PRINT`. We have `INPUT` (that internally uses `PRINT`). We have `LIST`. We have `TRACE`. We have `TAB()` and `SPC()`. And then we have here and there some routines that output a carriage-return character for various reasons. All these use `COUT`. Thus the first thing that Applesoft does is add 128 to the ASCII value of the character that must be displayed (more precisely, Applesoft applies an ORA-mask on the byte value, forcing the hi-bit to turn on). 
 
-Now with a byte value above 127, Applesoft then checks if the character is a "control-character", that is a character with an ASCII value below 32. But since the byte value is now above 127, it checks if the value is below 160 (=128+32). If it's NOT a control-character, then Applesoft checks if the FLASH mode is on. If it is, then it turns on the 6th bit of the byte (equivalent to add 32), and our byte value is now above 191.
+Now with a byte value above 127, Applesoft then checks if the character is a "control-character", that is a character with an ASCII value below 32. But since the byte value is now above 127, it checks if the value is below 160 (=128+32). If it's NOT a control-character, then Applesoft checks if the `FLASH` mode is on. If it is, then it turns on the 6th bit of the byte (equivalent to add 32), and our byte value is now above 191.
 
 Then the byte is sent to `COUT`.
 
-So, `COUT` has a value from which is either in
+So, `COUT` has a value which is either in
 - range 128 to 159 if a control character is to be output
 - range 160 to 255 if a `NORMAL` or `INVERSE` character is to be output
 - range 192 to 255 if a `FLASH` character is to be output
 
 The first thing that `COUT` does is modify the byte received:
-- if `NORMAL` mode is set, the value is not modified. The byte is still between 128 and 255
+- if `NORMAL` mode is set, the value is not modified. The byte is still **between 128 and 255**
 - if `INVERSE` mode is set, bits 6 and 7 of the value are set to 0, which is equivalent to 
 	- subtract 192 if the byte is above 191, or 
-	- subtract 128 if the byte is between 128 and 191. The byte is now between 0 and 63.
-- if `FLASH` mode is set, bit 7 is set to 0, equivalent to subtract 128. The byte is now between 64 and 127
+	- subtract 128 if the byte is between 128 and 191. The byte is now **between 0 and 63**.
+- if `FLASH` mode is set, bit 7 is set to 0, equivalent to subtract 128. The byte is now **between 64 and 127**.
 - if it's a control character, the value is not modified regardless of the current text mode
 
 So we have now 4 possibilities:
@@ -93,6 +93,8 @@ Now type
 PRINT PEEK (1024);" ";PEEK(1025);" ";PEEK(1026);" ";PEEK(1027)
 ```
 These are the 4 values of the first 4 characters on the top of the screen. The 1 is A in `INVERSE`, the 65 is A in `FLASH`, the 193 is A in `NORMAL` and the 160 is just the space character in `NORMAL` in the 4th position. The control-character was not printed.
+
+![PRINT multiples A](img/print_a.png)
 
 Now let us do the same but without `PRINT`:
 ```basic
@@ -248,11 +250,13 @@ In order to activate the feature, a simple `CALL 768` is enough. But before anyt
 
 What's that ? DOS/ProDOS use the CSW output redirection vector in order to handle their own features. Without going into details, this is (among other features) how DOS/ProDOS intercepts CTRL-D within `PRINT` commands in order to manipulate files on disk from an Applesoft program.
 
-DOS/ProDOS makes sure that CSW will redirect output to their routines. To prevent that, we need to disconnect DOS/ProDOS. And when we need DOS/ProDOS back we need to be able to reconnect DOS/ProDOS.
+DOS/ProDOS makes sure that CSW will redirect output to their routines. Because we are using redirection we need to take control over DOS/ProDOS. But also, you must know that PRINTing a character on the screen with DOS/ProDOS active is twice the time it takes if they were not active/present. Disabling the OS means doubling the output speed.
+
+To prevent that, we need to disconnect DOS/ProDOS. And when we need DOS/ProDOS back we need to be able to reconnect DOS/ProDOS.
 
 DOS can be disconnected with a `CALL 40672` and reconnected with `CALL 43089`.
 
 But there's a more universal method that is common to both DOS and ProDOS. It's as easy as POKEing values in CSW and KSW. But this has to be done in one shot in four consecutive `POKE`s within a program.
-`POKE 54,240: POKE 55,253: POKE 56,27: POKE 57,253` unhooks DOS/ProDOS and restores CSW/KSW to their original values.
+`POKE 54,240: POKE 55,253: POKE 56,27: POKE 57,253` unhooks DOS/ProDOS and restores CSW/KSW to their original values. In ProDOS, you also need to issue a NOTRACE command (because ProDOS uses TRACE to possibly interfere with EVERY Applesoft command).
 
 To restore DOS/ProDOS, as they use different CSW/KSW values, it's best to simply do a `CALL 976` (`$3D0`). or a `CALL 1002` (`$3EA`).
