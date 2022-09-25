@@ -17,6 +17,8 @@ If you want your text to be printed in inverse, all you have to do is issue an `
 ```basic
 INVERSE: PRINT "YOU WIN 10 POINTS !"
 ```
+![Inverse](img/inverse.png)
+
 If you don't issue a `NORMAL` command, then all the subsequent `PRINT`s will display text in `INVERSE`. The same goes for `FLASH`.
 
 Now, if you want to mix `NORMAL`/`INVERSE`/`FLASH` modes in the same string, your only option is to issue several `PRINT`s and adjust the text mode accordingly in between.
