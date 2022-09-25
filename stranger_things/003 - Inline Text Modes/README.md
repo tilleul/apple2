@@ -25,6 +25,7 @@ Now, if you want to mix `NORMAL`/`INVERSE`/`FLASH` modes in the same string, you
 ```basic
 PRINT "YOU WIN "; : INVERSE : PRINT "10"; : NORMAL : PRINT " POINTS !"
 ```
+![Normal and Inverse](img/normal_inverse.png)
 
 ## Integrating text modes within strings
 This is something that's possible on several 8-bit computers but not on the Apple II, except if you have a 80-column card. In this case, **and** if the card is active, you can use CTRL-O and CTRL-N to instruct the computer than the following characters are respectively in `INVERSE` or `NORMAL` modes. There's no CTRL code for the `FLASH` mode though as the 80 column cannot display `FLASH` characters.
