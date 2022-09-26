@@ -55,7 +55,7 @@ When you type a character on the Apple II keyboard, the character that's been ty
 
 Thus, `COUT` expects a byte with a value above 127. Let's see what happens with Applesoft.
 
-There are not many routines in Applesoft that output characters. We have `PRINT`. We have `INPUT` (that internally uses `PRINT`). We have `LIST`. We have `TRACE`. We have `TAB()` and `SPC()`. And then we have here and there some routines that output a carriage-return character for various reasons. All these use `COUT`. Thus the first thing that Applesoft does is add 128 to the ASCII value of the character that must be displayed (more precisely, Applesoft applies an ORA-mask on the byte value, forcing the hi-bit to turn on). 
+There are not many routines in Applesoft that output characters. We have `PRINT`. We have `INPUT` (that internally uses `PRINT`). We have `LIST`. We have `TRACE`. We have `TAB()` and `SPC()`. We have error messages too and then we have here and there some routines that output a carriage-return character for various reasons. All these use `COUT`. Thus the first thing that Applesoft does is add 128 to the ASCII value of the character that must be displayed (more precisely, Applesoft applies an ORA-mask on the byte value, forcing the hi-bit to turn on). 
 
 Now with a byte value above 127, Applesoft then checks if the character is a "control-character", that is a character with an ASCII value below 32. But since the byte value is now above 127, it checks if the value is below 160 (=128+32). If it's NOT a control-character, then Applesoft checks if the `FLASH` mode is on. If it is, then it turns on the 6th bit of the byte (equivalent to add 32), and our byte value is now above 191.
 
@@ -265,3 +265,12 @@ But there's a more universal method that is common to both DOS and ProDOS. It's 
 `POKE 54,240: POKE 55,253: POKE 56,27: POKE 57,253` unhooks DOS/ProDOS and restores CSW/KSW to their original values. In ProDOS, you also need to issue a NOTRACE command (because ProDOS uses TRACE to possibly interfere with EVERY Applesoft command).
 
 To restore DOS/ProDOS, as they use different CSW/KSW values, it's best to simply do a `CALL 976` (`$3D0`). or a `CALL 1002` (`$3EA`).
+
+## Example code
+To conclude, you'll find a [DSK image](st3_inline_text_modes.dsk) with a short animation example demonstrating the possibilities of this new feature.
+
+There's also a video of the program running: [meeting_the_beadmaster.mkv](meeting_the_beadmaster.mkv)
+
+The [Applesoft code](meeting_the_beadmaster.bas) is also available. The animation happen in lines 0-999 while the sprites are built in lines 1000-3000. The sprites are long string variables that include all the characters and control-characters needed. To build these I used an Excel spreadsheet as editor (as it was easier). Maybe one day I'll share it. But now is not the time.
+
+Anyway, enjoy !
