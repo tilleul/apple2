@@ -273,4 +273,4 @@ There's also a video of the program running: [meeting_the_beadmaster.mkv](meetin
 
 The [Applesoft code](meeting_the_beadmaster.bas) is also available. The animation happen in lines 0-999 while the sprites are built in lines 1000-3000. The sprites are long string variables that include all the characters and control-characters needed. To build these I used an Excel spreadsheet as editor (as it was easier). Maybe one day I'll share it. But now is not the time.
 
-Anyway, enjoy !
+Enjoy !
