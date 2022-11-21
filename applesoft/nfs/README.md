@@ -32,6 +32,9 @@ Applesoft: The Need For Speed is a series of articles that explain why some codi
 1. [Use addition instead of multiplication by 2](calculations/01_use_addition_instead_of_mul2.md): double addition of the same variable is faster than multiplying the variable by 2
 2. [Addition is faster than subtraction](calculations/02_addition_is_faster_than_subtraction.md): avoid subtraction whenever possible but don't use negative constants.
 
+### Program Structure
+1. [GOTO: Do it right](program_structure/01_goto_do_it_right.md): learn how to tame the limitations of GOTO and avoid GOSUB.
+
 (and many others) coming soon... 
 
 ## Methodology
