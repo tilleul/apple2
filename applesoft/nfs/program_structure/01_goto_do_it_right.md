@@ -151,10 +151,10 @@ Remember that you can use the `GOTO` "forward" trick more than once within the s
 
 Just so you know, if there are 10 lines between line numbers 260 and 350 (both included), and if line 260 has `GOTO 520`, it will take 902 cycles (3x114 + 9x55 + 1x65) to reach line 520.
 
-### That "complex" subroutine you need to GOSUB to from time to time
+### That "complex" subroutine you need to `GOSUB` to from time to time
 If placing the subroutine at the top of the program is not a good idea or not possible, then you need to make sure you'll `GOSUB` "forward": place the subroutine **after** any `GOSUB >there<` call, as close as possible to the last `GOSUB >there<`. Even within the main loop if needed: just skip that subroutine with an appropriate `GOTO` forward.
 
-## 🍎 Wishes ... GOTO waste
+## 🍎 Wishes ... `GOTO` waste
 The way `GOTO/GOSUB` searches for a line number is inefficient. Some simple things could have been made to make it a little better. Of course, the question is: was there enough memory space in the ROM to implement this ?
 
 1. In a program, line numbers (at the start of every line) are converted into 2-bytes integers. Why isn't it the case for the line numbers to `GOTO/GOSUB` ? This would have avoided the conversion from ASCII to integer during runtime AND saved memory. By the way, this is how it's implemented in Wozniak's Integer Basic. As a side note, this would have facilitated line renumbering routines.
